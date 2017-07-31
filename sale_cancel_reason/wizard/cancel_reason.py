@@ -25,5 +25,5 @@ class SaleOrderCancel(models.TransientModel):
         assert len(sale_ids) == 1, "Only 1 sale ID expected"
         sale = self.env['sale.order'].browse(sale_ids)
         sale.cancel_reason_id = self.reason_id.id
-        self.action_cancel(sale)
+        sale.action_cancel()
         return act_close
