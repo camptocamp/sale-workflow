@@ -72,6 +72,8 @@ class SaleOrder(models.Model):
     @api.multi
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
-        for line in self.order_line:
-            self._check_move_state(line)
+        if res is True:
+            for so in self:
+                for line in so.order_line:
+                    so._check_move_state(line)
         return res
