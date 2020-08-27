@@ -10,6 +10,12 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='rule_date_to']" position="after">
                 <field name="first_order_only" />
+                <field
+                    name="first_n_orders_only"
+                    attrs="{'invisible':[('first_order_only', '!=', False)]}"
+                    class="oe_inline"
+                />
+                <span>orders of each client matching the conditions</span>
             </xpath>
         </field>
     </record>
