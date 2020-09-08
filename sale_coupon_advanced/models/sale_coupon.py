@@ -14,17 +14,17 @@ class SaleCouponProgram(models.Model):
         help="Apply only on the first order of each client matching the conditions",
     )
 
-    first_n_orders_only = fields.Integer(
+    first_n_customer_orders = fields.Integer(
         help="Maximum number of sales orders of the customer in which reward \
          can be provided",
         string="Apply only on the next ",
         default=0,
     )
 
-    @api.constrains("first_n_orders_only")
+    @api.constrains("first_n_customer_orders")
     def _constrains_first_n_orders_positive(self):
         for record in self:
-            if record.first_order_only < 0:
+            if record.first_n_customer_orders < 0:
                 raise exceptions.ValidationError(
                     _("`Apply only on the next` should not be a negative value.")
                 )
@@ -42,12 +42,12 @@ class SaleCouponProgram(models.Model):
         order_count = self._get_order_count(order)
         if self.first_order_only and order_count:
             return {"error": _("Coupon can be used only for the first sale order!")}
-        if self.first_n_orders_only and order_count >= self.first_n_orders_only:
+        max_order_number = self.first_n_customer_orders
+        if max_order_number and order_count >= max_order_number:
             return {
                 "error": _(
-                    "Coupon can be used only for the first %s sale order!"
-                    % (str(self.first_n_orders_only))
-                )
+                    "Coupon can be used only for the first {} sale order!"
+                ).format(max_order_number)
             }
         return super()._check_promo_code(order, coupon_code)
 
@@ -63,15 +63,15 @@ class SaleCouponProgram(models.Model):
 
     def _filter_n_first_order_programs(self, order):
         """
-        Filter programs where first_n_orders_only is set, and
+        Filter programs where first_n_customer_orders is set, and
         the max number of orders have already been reached by the customer.
         """
         order_count = self._get_order_count(order)
         filtered_programs = self.env[self._name]
         for program in self:
             if (
-                program.first_n_orders_only
-                and order_count >= program.first_n_orders_only
+                program.first_n_customer_orders
+                and order_count >= program.first_n_customer_orders
             ):
                 continue
             filtered_programs |= program

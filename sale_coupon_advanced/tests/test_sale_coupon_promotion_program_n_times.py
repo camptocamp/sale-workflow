@@ -33,9 +33,9 @@ class TestProgramForNFirstSaleOrder(TestSaleCouponCommon):
 
     def test_no_n_orders(self):
         """
-        If `first_n_orders_only` == 0, program is always appliable.
+        If `first_n_customer_orders` == 0, program is always appliable.
         """
-        self.program.write({"first_n_orders_only": 0})
+        self.program.write({"first_n_customer_orders": 0})
         order = self._create_order(self.product_A, 1)
         order.recompute_coupon_lines()
         for __ in range(10):
@@ -44,10 +44,10 @@ class TestProgramForNFirstSaleOrder(TestSaleCouponCommon):
 
     def test_max_2_orders(self):
         """
-        If `first_n_orders_only` > 0, program is appliable n times.
+        If `first_n_customer_orders` > 0, program is appliable n times.
         """
         max_orders = 2
-        self.program.write({"first_n_orders_only": max_orders})
+        self.program.write({"first_n_customer_orders": max_orders})
         order = self._create_order(self.product_A, 1)
         order.recompute_coupon_lines()
         for __ in range(max_orders):
