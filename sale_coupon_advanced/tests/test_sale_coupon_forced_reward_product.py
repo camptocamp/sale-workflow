@@ -1,8 +1,7 @@
 # Copyright 2020 Camptocamp SA
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
-
-from odoo.exceptions import CacheMiss
 from odoo.tests.common import Form
+
 from odoo.addons.sale_coupon.tests.common import TestSaleCouponCommon
 
 
@@ -54,6 +53,13 @@ class TestSaleCouponForcedRewardProduct(TestSaleCouponCommon):
                 return i
         raise ValueError("Record does not exist in recordset")
 
+    def _test_auto_removed_discount(self, order, products, program):
+        self.assertEqual(len(order.order_line), len(products))
+        lines = order.order_line.filtered(lambda r: r.product_id in products)
+        self.assertEqual(len(lines), len(products))
+        self.assertNotIn(program, order.code_promo_program_id)
+        self.assertNotIn(program, order.no_code_promo_program_ids)
+
     def test_01_filter_programs_from_common_rules_result(self):
         """Check `_filter_programs_from_common_rules`."""
         # TODO adapt the test
@@ -75,7 +81,10 @@ class TestSaleCouponForcedRewardProduct(TestSaleCouponCommon):
             - reward and discount respectively based on their product id
             - product discount should canceled the product reward price
         Case 2: discount product unlinked, when reward product unlinked.
-        Case 3: reward product not unlinked, when discount product is
+            Form case.
+        Case 3: discount product unlinked, when reward product unlinked.
+            backend case.
+        Case 4: reward product not unlinked, when discount product is
             unlinked.
         """
         # Case 1.
@@ -109,28 +118,44 @@ class TestSaleCouponForcedRewardProduct(TestSaleCouponCommon):
             "The order discount product should contains a negative reward price",
         )
         # Case 2.
-        reward_line = all_lines.filtered(
-            lambda r: r.product_id == self.reward_product)
+        reward_line = order.order_line.filtered(
+            lambda r: r.product_id == self.reward_product
+        )
         reward_line_idx = self._get_record_index(order.order_line, reward_line)
         # Use Form to mimic actual line remove via interface.
         with Form(order) as so:
             so.order_line.remove(reward_line_idx)
-        self.assertEqual(len(order.order_line), 1)
-        self.assertTrue(
-            order.order_line.filtered(
-                lambda r: r.product_id == self.product_A
-            )
-        )
+        self._test_auto_removed_discount(order, self.product_A, self.program_forced)
         # Case 3.
+        order.recompute_coupon_lines()
+        reward_line = order.order_line.filtered(
+            lambda r: r.product_id == self.reward_product
+        )
+        reward_line.unlink()
+        self._test_auto_removed_discount(order, self.product_A, self.program_forced)
+        # Case 4.
         order.recompute_coupon_lines()
         # Sanity check.
         self.assertEqual(len(order.order_line), 3)
         discount_line = order.order_line.filtered(
-            lambda r: r.product_id == self.discount_product)
+            lambda r: r.product_id == self.discount_product
+        )
         discount_line.unlink()
         self.assertEqual(len(order.order_line), 2)
-        product_ids = order.order_line.mapped('product_id').ids
+        product_ids = order.order_line.mapped("product_id").ids
         self.assertEqual(
-            sorted(product_ids),
-            sorted((self.product_A | self.reward_product).ids)
+            sorted(product_ids), sorted((self.product_A | self.reward_product).ids)
         )
+
+    def test_03_order_line_forced_reward_result(self):
+        """Unlink promo product and try to use 6 code on discount."""
+        order = self.order_forced
+        order.recompute_coupon_lines()
+        lines_code_6 = order.order_line.filtered(
+            lambda r: r.product_id in (self.discount_product, self.product_A)
+        )
+        reward_line = order.order_line.filtered(
+            lambda r: r.product_id == self.reward_product
+        )
+        order.write({"order_line": [(2, reward_line.id), (6, 0, lines_code_6.ids)]})
+        self._test_auto_removed_discount(order, self.product_A, self.program_forced)
