@@ -1,3 +1,5 @@
+import re
+
 from odoo.exceptions import UserError
 from odoo.tests import common
 
@@ -55,6 +57,7 @@ class TestSaleCouponCustomCode(common.SavepointCase):
             self._generate_coupon_code(self.coupon_generate_1)
 
     def test_04_code_generation(self):
-        """Generate standard 19/20 numbers code."""
+        """Generate standard coupon code."""
         coupon = self._generate_coupon_code(self.coupon_generate_1)
-        self.assertTrue(19 <= len(coupon.code) <= 20)
+        # Standard coupon code must have all symbols as digits.
+        self.assertTrue(re.match(r"^\d+$", coupon.code))

@@ -10,6 +10,9 @@ class SaleCoupon(models.Model):
 
     _inherit = "sale.coupon"
 
+    # Must overwrite here for override method to take effect.
+    code = fields.Char(default=lambda s: s._generate_code())
+
     def _validate_custom_code_rule(self, custom_code_rule):
         if custom_code_rule[1] < 1:
             raise UserError(
@@ -33,6 +36,3 @@ class SaleCoupon(models.Model):
             self._validate_custom_code_rule(custom_code_rule)
             return self._generate_custom_code(custom_code_rule)
         return super()._generate_code()
-
-    # Must overwrite here for override method to take effect.
-    code = fields.Char(default=_generate_code)
