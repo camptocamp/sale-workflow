@@ -22,8 +22,8 @@ class SaleCouponProgram(models.Model):
     @api.depends("company_id.currency_id", "currency_custom_id")
     def _compute_currency_id(self):
         for rec in self:
-            rec.currency_id = rec.currency_custom_id.id or rec.company_id.currency_id.id
+            rec.currency_id = rec.currency_custom_id or rec.company_id.currency_id
 
     def _inverse_currency_id(self):
         for rec in self:
-            rec.currency_custom_id = rec.currency_id.id
+            rec.currency_custom_id = rec.currency_id

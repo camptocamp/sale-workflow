@@ -133,7 +133,7 @@ msgstr "Bons de réduction"
 #. module: sale_coupon_multi_use
 #: model:ir.model,name:sale_coupon_multi_use.model_sale_coupon_apply_code
 msgid "Sales Coupon Apply Code"
-msgstr "Codice di applicazione coupon di vendita"
+msgstr "Code du bon de réduction"
 
 #. module: sale_coupon_multi_use
 #: model:ir.model,name:sale_coupon_multi_use.model_sale_coupon_program
