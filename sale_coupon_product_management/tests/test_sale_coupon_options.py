@@ -33,6 +33,7 @@ class TestSaleCouponOptions(TestSaleCouponProductManageCommon):
 
         Case 1: discount_fixed_amount + product_sale_ok
         Case 2: discount_fixed_amount + product_not_sale_ok
+        Case 3: discount_fixed_amount (with program rec) + product_not_sale_ok
         """
         # Case 1.
         values = (
@@ -54,6 +55,20 @@ class TestSaleCouponOptions(TestSaleCouponProductManageCommon):
             {
                 SELF: {"reward_type": "discount", "discount_type": "fixed_amount"},
                 DISCOUNT_PRODUCT_FNAME: {"sale_ok": False},
+            },
+        )
+        # Case 3.
+        values = (
+            self.program_option_fixed_amount | self.program_option_not_sale_ok
+        ).get_program_values(program=self.program_coupon_1)
+        self.assertEqual(
+            values,
+            {
+                SELF: {"reward_type": "discount", "discount_type": "fixed_amount"},
+                DISCOUNT_PRODUCT_FNAME: {
+                    "sale_ok": False,
+                    "list_price": self.program_coupon_1.discount_fixed_amount,
+                },
             },
         )
 

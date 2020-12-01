@@ -2,36 +2,15 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from odoo.exceptions import UserError, ValidationError
 
-from .common import TestSaleCouponProductManageCommon
-
-NAME_COUPON_PROGRAM = "Dummy Coupon Program"
-CODE_COUPON_PROGRAM = "MYCODE123"
+from .common import (
+    CODE_COUPON_PROGRAM,
+    NAME_COUPON_PROGRAM,
+    TestSaleCouponProductManageCommon,
+)
 
 
 class TestSaleCouponManage(TestSaleCouponProductManageCommon):
     """Test class for program management use cases."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Set up data for multi use coupon tests."""
-        super().setUpClass()
-        cls.product_category_promotion = cls.ProductCategory.create(
-            {"name": "Dummy Promotion Category", "is_promotion_category": True}
-        )
-        cls.product_category_coupon = cls.ProductCategory.create(
-            {"name": "Dummy Coupon Category", "is_coupon_category": True}
-        )
-        cls.program_coupon_1 = cls.SaleCouponProgram.create(
-            {
-                "name": NAME_COUPON_PROGRAM,
-                "program_type": "coupon_program",
-                "reward_type": "discount",
-                "discount_type": "fixed_amount",
-                "discount_fixed_amount": 1000,
-                "related_product_default_code": CODE_COUPON_PROGRAM,
-                "related_product_categ_id": cls.product_category_coupon.id,
-            }
-        )
 
     def test_01_program_discount_product_rel_vals(self):
         """Check created program with related product.
