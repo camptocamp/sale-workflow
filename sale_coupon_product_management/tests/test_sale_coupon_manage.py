@@ -1,6 +1,7 @@
 # Copyright 2020 Camptocamp SA
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from odoo.exceptions import UserError, ValidationError
+from odoo.tests.common import Form
 
 from .common import (
     CODE_COUPON_PROGRAM,
@@ -209,3 +210,17 @@ class TestSaleCouponManage(TestSaleCouponProductManageCommon):
             self.product_category_promotion.copy(
                 default={"default_promotion_next_order_category": True}
             )
+
+    def test_08_onchange_product_categ_with_opts(self):
+        """Onchange product category that has program option."""
+        product = self.program_coupon_1.discount_line_product_id
+        self.assertFalse(product.sale_ok)
+        self.product_category_coupon.program_option_ids = [
+            (4, self.program_option_sale_ok.id)
+        ]
+        # Need to use Form, so constraint is not triggered before
+        # onchange.
+        with Form(product) as p:
+            p.categ_id = self.product_category_coupon
+            # product._onchange_product_categ_with_opts()
+            self.assertTrue(p.sale_ok)

@@ -98,9 +98,9 @@ class SaleCouponProgramOption(models.Model):
             return program
         return operator.attrgetter(path)(program)
 
-    def _update_values_from_program(self, opt_vals, program=None):
+    def _update_values_from_program(self, opt_vals, program):
         self.ensure_one()
-        if program and self.option_type == "discount_fixed_amount":
+        if self.option_type == "discount_fixed_amount":
             opt_vals[DISCOUNT_PRODUCT_FNAME][
                 "list_price"
             ] = program.discount_fixed_amount
@@ -121,7 +121,8 @@ class SaleCouponProgramOption(models.Model):
         for option in self:
             opt_cfg = cfg[option.option_type]
             opt_vals = opt_cfg["values"]
-            option._update_values_from_program(opt_vals, program=program)
+            if program:  # TODO: a bit redundant.
+                option._update_values_from_program(opt_vals, program)
             opt_keys = opt_vals.keys()
             for key in opt_keys:
                 values[key].update(opt_vals[key])

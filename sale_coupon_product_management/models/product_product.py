@@ -16,11 +16,10 @@ class ProductProduct(models.Model):
 
     @api.onchange("categ_id")
     def _onchange_product_categ_with_opts(self):
-        if self._predicate_product_categ_with_opts():
+        if self.categ_id._predicate_product_categ_with_opts():
             # Updating only product.product values here.
-            self.update(
-                self.program_option_ids.get_program_values()[DISCOUNT_PRODUCT_FNAME]
-            )
+            options = self.categ_id.program_option_ids
+            self.update(options.get_program_values()[DISCOUNT_PRODUCT_FNAME])
 
     @api.constrains("categ_id", "sale_ok")
     def _check_product_options(self):
