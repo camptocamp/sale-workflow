@@ -42,18 +42,8 @@ class SaleOrder(models.Model):
             order = order = order.with_context(**{ORDER_CTX_KEY: order})
             super(SaleOrder, order).action_cancel()
             order._get_multi_use_coupons().reset_coupons()
-        return True
-
-    def action_draft(self):
-        """Extend to pass coupon_sale_order context."""
-        super().action_draft()
-        for order in self:
-            order = order = order.with_context(**{ORDER_CTX_KEY: order})
-            # TODO: refactor this to use same approach as for
-            # action_confirm and action_cancel if Odoo fixes their bug.
-            # Now single use coupons are not reset back if you put SO to
-            # draft state.
-            order.coupon_multi_use_ids.consume_coupons()
+            # Mimic applied_coupon_ids logic.
+            order.coupon_multi_use_ids = [(5,)]
         return True
 
     def _get_coupons_from_2many_commands(self, commands):

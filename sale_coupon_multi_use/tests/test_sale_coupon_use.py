@@ -250,7 +250,6 @@ class TestSaleCouponMultiUse(TestSaleCouponMultiUseCommon):
 
         Case 1: cancel sale orders.
         Case 2: set draft sale orders.
-        Case 3: confirm sale orders.
         """
         self.coupon_apply_wiz.with_context(active_id=self.sale_2.id).process_coupon()
         self.coupon_apply_wiz.with_context(active_id=self.sale_1.id).process_coupon()
@@ -258,22 +257,23 @@ class TestSaleCouponMultiUse(TestSaleCouponMultiUseCommon):
         self.assertEqual(self.coupon_multi_use_1.state, "used")
         self.assertEqual(len(self.coupon_multi_use_1.consumption_line_ids), 2)
         self.sale_2.action_cancel()
+        self.assertFalse(self.sale_2.coupon_multi_use_ids)
         self.assertEqual(self.coupon_multi_use_1.state, "new")
         self.assertEqual(len(self.coupon_multi_use_1.consumption_line_ids), 1)
         self.sale_1.action_cancel()
+        self.assertFalse(self.sale_1.coupon_multi_use_ids)
         self.assertFalse(self.coupon_multi_use_1.consumption_line_ids)
         self.assertEqual(self.coupon_multi_use_1.state, "new")
         # Case 2.
         self.sale_2.action_draft()
+        self.assertFalse(self.sale_2.coupon_multi_use_ids)
         self.assertEqual(self.coupon_multi_use_1.state, "new")
-        self.assertEqual(len(self.coupon_multi_use_1.consumption_line_ids), 1)
+        self.assertFalse(self.coupon_multi_use_1.consumption_line_ids)
         self.sale_1.action_draft()
-        self.assertEqual(self.coupon_multi_use_1.state, "used")
-        self.assertEqual(len(self.coupon_multi_use_1.consumption_line_ids), 2)
-        # Case 3.
-        (self.sale_1 | self.sale_2).action_confirm()
-        self.assertEqual(self.coupon_multi_use_1.state, "used")
-        self.assertEqual(len(self.coupon_multi_use_1.consumption_line_ids), 2)
+        self.assertFalse(self.sale_1.coupon_multi_use_ids)
+        self.assertEqual(self.coupon_multi_use_1.state, "new")
+        self.assertFalse(self.coupon_multi_use_1.consumption_line_ids)
+        self.assertFalse(self.sale_1.coupon_multi_use_ids)
 
     def test_07_coupon_multi_use(self):
         """Try to use different multi-use coupons from same program."""
