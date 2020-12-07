@@ -98,12 +98,11 @@ class SaleCouponProgramOption(models.Model):
             return program
         return operator.attrgetter(path)(program)
 
-    def _update_values_from_program(self, opt_vals, program):
+    def _prepare_values_from_program(self, program):
         self.ensure_one()
         if self.option_type == "discount_fixed_amount":
-            opt_vals[DISCOUNT_PRODUCT_FNAME][
-                "list_price"
-            ] = program.discount_fixed_amount
+            return {"list_price": program.discount_fixed_amount}
+        return {}
 
     def get_program_values(self, program=None):
         """Return program values from related options.
@@ -122,7 +121,14 @@ class SaleCouponProgramOption(models.Model):
             opt_cfg = cfg[option.option_type]
             opt_vals = opt_cfg["values"]
             if program:  # TODO: a bit redundant.
-                option._update_values_from_program(opt_vals, program)
+                # NOTE. This is bad design. If values from program would
+                # need to include extra values on different level dicts,
+                # this could easily break or work incorrectly. Its
+                # because get_program_values needs to be aware what
+                # _prepare_values_from_program needs to return.
+                opt_vals[DISCOUNT_PRODUCT_FNAME].update(
+                    option._prepare_values_from_program(program)
+                )
             opt_keys = opt_vals.keys()
             for key in opt_keys:
                 values[key].update(opt_vals[key])
