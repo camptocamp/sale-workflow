@@ -51,7 +51,7 @@ class SaleCoupon(models.Model):
 
     def _check_coupon_code(self, order):
         # Same check as is for `applied_coupon_ids` field.
-        if self.program_id in order.coupon_multi_use_ids.mapped("program_id"):
+        if self.program_id in order.mapped("coupon_multi_use_ids.program_id"):
             return {
                 "error": _("Multi-Use Coupon is already applied for the same reward")
             }
@@ -152,3 +152,14 @@ class SaleCoupon(models.Model):
             if vals.get("state") == "new":
                 self._handle_multi_use_reset(coupon_sale_order)
         return super(SaleCoupon, other_coupons).write(vals)
+
+    # NOTE. This is a bit limited. Such methods should be defined on
+    # sale_coupon, because its related with all coupons, not just
+    # multi-use coupons.
+    def consume_coupons(self):
+        """Set coupons state to 'used'."""
+        self.write({"state": "used"})
+
+    def reset_coupons(self):
+        """Set coupons state to 'new'."""
+        self.write({"state": "new"})

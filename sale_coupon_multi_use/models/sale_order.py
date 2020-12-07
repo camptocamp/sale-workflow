@@ -22,20 +22,10 @@ class SaleOrder(models.Model):
         readonly=True,
     )
 
-    def _get_multi_use_coupons_to_handle(self, filter_func=None):
-        self.ensure_one()
-        coupons = self.coupon_multi_use_ids - self.applied_coupon_ids
-        if filter_func:
-            return filter_func(coupons)
-        return coupons
-
-    def _trigger_multi_use_coupons(self, state, filter_func=None):
+    def _get_multi_use_coupons(self):
         self.ensure_one()
         # NOTE. This method must be called with ORDER_CTX_KEY on order.
-        multi_use_coupons = self._get_multi_use_coupons_to_handle()
-        if multi_use_coupons:
-            multi_use_coupons.write({"state": state})
-        return multi_use_coupons
+        return self.coupon_multi_use_ids - self.applied_coupon_ids
 
     def action_confirm(self):
         """Extend to pass coupon_sale_order context."""
@@ -43,7 +33,7 @@ class SaleOrder(models.Model):
             # Mimic same behavior as for single-user coupon.
             order = order.with_context(**{ORDER_CTX_KEY: order})
             super(SaleOrder, order).action_confirm()
-            order._trigger_multi_use_coupons("used")
+            order._get_multi_use_coupons().consume_coupons()
         return True
 
     def action_cancel(self):
@@ -51,25 +41,23 @@ class SaleOrder(models.Model):
         for order in self:
             order = order = order.with_context(**{ORDER_CTX_KEY: order})
             super(SaleOrder, order).action_cancel()
-            order._trigger_multi_use_coupons("new")
+            order._get_multi_use_coupons().reset_coupons()
         return True
 
     def action_draft(self):
         """Extend to pass coupon_sale_order context."""
         super().action_draft()
         for order in self:
+            order = order = order.with_context(**{ORDER_CTX_KEY: order})
             # TODO: refactor this to use same approach as for
             # action_confirm and action_cancel if Odoo fixes their bug.
             # Now single use coupons are not reset back if you put SO to
             # draft state.
-            coupons_multi_use = order.coupon_multi_use_ids
-            if coupons_multi_use:
-                coupons_multi_use.with_context(**{ORDER_CTX_KEY: order}).write(
-                    {"state": "used"}
-                )
+            order.coupon_multi_use_ids.consume_coupons()
         return True
 
     def _get_coupons_from_2many_commands(self, commands):
+        """Browse coupon IDs from 2many command."""
         ids = []
         for cmd in commands:
             if cmd[0] == 6:
@@ -85,6 +73,10 @@ class SaleOrder(models.Model):
     def write(self, vals):
         """Extend to add multi-use coupons."""
         if vals.get("applied_coupon_ids"):
+            # We want to add multi-use coupons that were added on
+            # standard applied_coupon_ids, so such coupon is preserved (
+            # applied_coupon_ids relation is removed once same coupon is
+            # used on multiple sale orders).
             coupons_multi_use = self._get_multi_use_coupons_from_2many_commands(
                 vals["applied_coupon_ids"]
             )

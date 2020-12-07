@@ -23,7 +23,7 @@ msgstr "Montant"
 #. module: sale_coupon_multi_use
 #: model:ir.model.fields,field_description:sale_coupon_multi_use.field_sale_coupon__sale_multi_use_ids
 msgid "Applied on Orders"
-msgstr ""
+msgstr "Appliqué sur les bons de commandes"
 
 #. module: sale_coupon_multi_use
 #: model:ir.model.fields,field_description:sale_coupon_multi_use.field_sale_coupon__consumption_line_ids
@@ -125,7 +125,7 @@ msgstr ""
 #: code:addons/sale_coupon_multi_use/models/sale_coupon.py:0
 #, python-format
 msgid "Multi-Use Coupon is already applied for the same reward"
-msgstr ""
+msgstr "Le coupon a déjà été appliqué sur la même récompense"
 
 #. module: sale_coupon_multi_use
 #: model:ir.model,name:sale_coupon_multi_use.model_sale_coupon_consumption_line
@@ -145,7 +145,7 @@ msgstr "Bons de réduction"
 #. module: sale_coupon_multi_use
 #: model:ir.model,name:sale_coupon_multi_use.model_sale_coupon_apply_code
 msgid "Sales Coupon Apply Code"
-msgstr "Codice di applicazione coupon di vendita"
+msgstr "Code du bon de réduction"
 
 #. module: sale_coupon_multi_use
 #: model:ir.model,name:sale_coupon_multi_use.model_sale_coupon_program
