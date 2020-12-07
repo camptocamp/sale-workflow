@@ -3,10 +3,6 @@ from odoo import fields, models
 ORDER_CTX_KEY = "coupon_sale_order"
 
 
-def _get_order_line_coupons_filter(line):
-    return lambda r: r.program_id.discount_line_product_id == line.product_id
-
-
 class SaleOrder(models.Model):
     """Extend to modify action_confirm for multi-use coupons."""
 
@@ -86,15 +82,19 @@ class SaleOrderLine(models.Model):
         # Reactivate coupons related to unlinked reward line
         for line in self.filtered(lambda line: line.is_reward_line):
             order = line.order_id
-            _filter = _get_order_line_coupons_filter(line)
-            coupons_to_detach = order.coupon_multi_use_ids.filtered(_filter)
+            coupons_to_detach = order.coupon_multi_use_ids.filtered(
+                lambda r: r.program_id.discount_line_product_id == line.product_id
+            )
             # We can only reactivate coupons that are not part of
             # applied_coupon_ids, because that part will signal
             # reactivate too.
             coupons_to_reactivate = (
-                coupons_to_detach - order.applied_coupon_ids.filtered(_filter)
+                coupons_to_detach
+                - order.applied_coupon_ids.filtered(
+                    lambda r: r.program_id.discount_line_product_id == line.product_id
+                )
             )
-            coupons_to_reactivate.write({"state": "new"})
+            coupons_to_reactivate.reset_coupons()
             order.coupon_multi_use_ids -= coupons_to_detach
             # Remove the program from the order if the deleted line is
             # the reward line of the program.
