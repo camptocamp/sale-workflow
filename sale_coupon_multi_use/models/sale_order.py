@@ -42,33 +42,27 @@ class SaleOrder(models.Model):
             order.coupon_multi_use_ids = [(5,)]
         return True
 
-    def _get_coupons_from_2many_commands(self, commands):
-        """Browse coupon IDs from 2many command."""
-        ids = []
-        for cmd in commands:
-            if cmd[0] == 6:
-                ids.extend(cmd[2])
-            elif cmd[0] == 4:
-                ids.append(cmd[1])
-        return self.env["sale.coupon"].browse(ids)
-
-    def _get_multi_use_coupons_from_2many_commands(self, commands):
-        coupons = self._get_coupons_from_2many_commands(commands)
-        return coupons.filtered("multi_use")
-
     def write(self, vals):
         """Extend to add multi-use coupons."""
-        if vals.get("applied_coupon_ids"):
-            # We want to add multi-use coupons that were added on
-            # standard applied_coupon_ids, so such coupon is preserved (
-            # applied_coupon_ids relation is removed once same coupon is
-            # used on multiple sale orders).
-            coupons_multi_use = self._get_multi_use_coupons_from_2many_commands(
-                vals["applied_coupon_ids"]
-            )
-            if coupons_multi_use:
-                vals["coupon_multi_use_ids"] = [(6, 0, coupons_multi_use.ids)]
-        return super().write(vals)
+        res = super().write(vals)
+        applied_coupon_ids = vals.get("applied_coupon_ids", [])
+        # Only care to move if coupons were added (4 or 6 cmd).
+        if any(cmd[0] in (4, 6) for cmd in applied_coupon_ids):
+            # Not very optimal to write multiple times, but moving ids
+            # between 2many commands (before write) is more complicated.
+            for order in self:
+                ids_to_move = order.applied_coupon_ids.filtered("multi_use").ids
+                if ids_to_move:
+                    order.write(
+                        {
+                            # Detach from single use coupons.
+                            "applied_coupon_ids": [(3, _id) for _id in ids_to_move],
+                            # Must use cmd 4 instead of 6, to not overwrite existing
+                            # coupons.
+                            "coupon_multi_use_ids": [(4, _id) for _id in ids_to_move],
+                        }
+                    )
+        return res
 
 
 class SaleOrderLine(models.Model):
