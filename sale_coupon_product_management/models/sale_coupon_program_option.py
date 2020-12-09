@@ -120,12 +120,7 @@ class SaleCouponProgramOption(models.Model):
         for option in self:
             opt_cfg = cfg[option.option_type]
             opt_vals = opt_cfg["values"]
-            if program:  # TODO: a bit redundant.
-                # NOTE. This is bad design. If values from program would
-                # need to include extra values on different level dicts,
-                # this could easily break or work incorrectly. Its
-                # because get_program_values needs to be aware what
-                # _prepare_values_from_program needs to return.
+            if program:
                 opt_vals[DISCOUNT_PRODUCT_FNAME].update(
                     option._prepare_values_from_program(program)
                 )
