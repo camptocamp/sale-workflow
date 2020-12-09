@@ -137,9 +137,17 @@ class SaleOrder(models.Model):
         new_sale_order.onchange_partner_id()
         self._update_pricelist(new_sale_order.pricelist_id)
 
+    def get_update_pricelist_order_lines(self):
+        """Return order lines to trigger product_id_change method.
+
+        Can be extended to filter returned lines.
+        """
+        self.ensure_one()
+        return self.order_line
+
     def _update_pricelist(self, pricelist):
         self.pricelist_id = pricelist
-        for line in self.order_line:
+        for line in self.get_update_pricelist_order_lines():
             line.product_id_change()
 
     # FIXME: find simpler solution, so write/unlink would not
