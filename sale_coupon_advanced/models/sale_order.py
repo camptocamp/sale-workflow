@@ -6,6 +6,11 @@ from odoo import _, models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    def _is_reward_in_order_lines(self, program):
+        if program._is_program_forced():
+            return True  # forced program ignores this check.
+        return super()._is_reward_in_order_lines(program)
+
     def _get_next_order_line_sequence(self):
         self.ensure_one()
         seq = 1
@@ -18,18 +23,9 @@ class SaleOrder(models.Model):
             return seq
 
     def _create_reward_line(self, program):
-        self._filter_force_create_counter_line_for_reward_product(program)
-        super()._create_reward_line(program)
-
-    def _filter_force_create_counter_line_for_reward_product(
-        self, program, predicate=None
-    ):
-        """Create counter line if its needed for program."""
-        # NOTE. Not passing coupon_code, because from this call we dont
-        # have it, but its not needed either (so will just default to
-        # None).
-        if program._check_promo_code_forced(self, predicate=predicate):
+        if program._is_program_forced():
             self._create_counter_line_for_reward_product(program)
+        super()._create_reward_line(program)
 
     def _create_counter_line_for_reward_product(self, program):
         """Create force line to counter balance discount line.
@@ -60,6 +56,7 @@ class SaleOrder(models.Model):
                 "order_id": self.id,
             }
         )
+        # TODO: is this still necessary?
         sol.product_id_change()
         return sol
 
@@ -86,12 +83,21 @@ class SaleOrder(models.Model):
         return programs
 
     def _create_new_no_code_promo_reward_lines(self):
+        programs = self.with_context(
+            force_not_ordered_no_code_reward_programs=True
+        )._get_applicable_no_code_promo_program()
+        for program in programs.filtered(lambda r: r._is_program_forced()):
+            self._create_counter_line_for_reward_product(program)
         super()._create_new_no_code_promo_reward_lines()
-        program = self._get_applicable_no_code_promo_program().filtered(
-            lambda p: p.reward_type == "use_pricelist"
+        # Can there be only one such pricelist program?
+        program_pricelist = programs.filtered(
+            lambda r: r.reward_type == "use_pricelist"
         )
-        if program and self.pricelist_id != program.reward_pricelist_id:
-            self._update_pricelist(program.reward_pricelist_id)
+        if (
+            program_pricelist
+            and self.pricelist_id != program_pricelist.reward_pricelist_id
+        ):
+            self._update_pricelist(program_pricelist.reward_pricelist_id)
 
     def _get_reward_line_values(self, program):
         # due to convention reward line should be created, in case of pricelist
