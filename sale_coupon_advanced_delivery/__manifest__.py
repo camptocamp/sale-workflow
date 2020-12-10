@@ -8,7 +8,7 @@
     "website": "https://github.com/OCA/sale-workflow",
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "license": "AGPL-3",
-    "depends": ["sale_coupon_advanced", "delivery"],
+    "depends": ["sale_coupon_advanced", "sale_coupon_delivery"],
     "installable": True,
     "auto_install": True,
 }
