@@ -89,10 +89,11 @@ class SaleOrder(models.Model):
         for program in programs.filtered(lambda r: r._is_program_forced()):
             self._create_counter_line_for_reward_product(program)
         super()._create_new_no_code_promo_reward_lines()
-        # Can there be only one such pricelist program?
         program_pricelist = programs.filtered(
             lambda r: r.reward_type == "use_pricelist"
-        )
+        )[
+            :1
+        ]  # making sure we limit to 1.
         if (
             program_pricelist
             and self.pricelist_id != program_pricelist.reward_pricelist_id
