@@ -74,6 +74,18 @@ class SaleCouponProgram(models.Model):
                 extra_vals[product_fname] = val
         return extra_vals
 
+    def _prepare_forced_product_vals(self):
+        self.ensure_one()
+        forced_product_vals = {"name": self.name}
+        categ = self.related_product_categ_id
+        if categ._predicate_product_categ_with_opts():
+            options = categ.program_option_ids
+            extra_product_vals = options.get_program_values(program=self)[
+                DISCOUNT_PRODUCT_FNAME
+            ]
+            forced_product_vals.update(extra_product_vals)
+        return forced_product_vals
+
     @api.model
     def create(self, vals):
         """Extend to initially update related product values.
@@ -81,26 +93,18 @@ class SaleCouponProgram(models.Model):
         Related fields on product won't be updated by default, because
         product is created after related program creation.
         """
-
-        def prepare_forced_product_vals():
-            forced_product_vals = {"name": vals["name"]}
-            categ = self.env["product.category"].browse(
-                vals.get("related_product_categ_id")
+        # Using virtual record here, so we can pass product values when
+        # product is created (this avoids multiple product update calls).
+        program_new = self.new(values=vals)
+        product_extra_vals = program_new._get_reward_line_product_extra_create_vals(
+            vals
+        )
+        self = self.with_context(
+            forced_product_vals=dict(
+                product_extra_vals, **program_new._prepare_forced_product_vals()
             )
-            if categ._predicate_product_categ_with_opts():
-                options = categ.program_option_ids
-                extra_product_vals = options.get_program_values()[
-                    DISCOUNT_PRODUCT_FNAME
-                ]
-                forced_product_vals.update(extra_product_vals)
-            return forced_product_vals
-
-        self = self.with_context(forced_product_vals=prepare_forced_product_vals())
-        program = super(SaleCouponProgram, self).create(vals)
-        product_extra_vals = program._get_reward_line_product_extra_create_vals(vals)
-        if product_extra_vals:
-            program.discount_line_product_id.write(product_extra_vals)
-        return program
+        )
+        return super(SaleCouponProgram, self).create(vals)
 
     def write(self, vals):
         """Extend to update force update product name from program name.
