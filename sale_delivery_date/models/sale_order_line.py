@@ -110,23 +110,32 @@ class SaleOrderLine(models.Model):
     def _prepare_procurement_values_time_windows(self, date_planned):
         """Return 'date_deadline' according to customer's time windows.
 
-        This computation is called only if no commitment_date is set.
-        It will return the effective delivery date by considerint the next
+        This computation is called only if no commitment_date is set and
+        if the customer's delivery time preference is "time windows".
+        It will return the effective delivery date by considering the next
         preferred delivery time window of the customer.
         """
         if self.order_id.partner_shipping_id.delivery_time_preference != "time_windows":
             return
         ops = self.order_id.partner_shipping_id
-        next_preferred_date = ops.next_delivery_window_start_datetime(
-            from_date=date_planned
+        # As the 'date_planned' is the date when the work can start on the
+        # transfer, we have to add the security lead of the company to get
+        # the date indicating when the transfer will be ready to be shipped.
+        # From this date we will be able to compute the preferred delivery date
+        # of the customer.
+        date_transfer_done = date_planned + timedelta(
+            days=self.order_id.company_id.security_lead
         )
-        if date_planned != next_preferred_date:
+        next_preferred_date = ops.next_delivery_window_start_datetime(
+            from_date=date_transfer_done
+        )
+        if date_transfer_done != next_preferred_date:
             _logger.debug(
                 "Delivery window applied for order %s. Date planned for line %s"
                 " rescheduled from %s to %s",
                 self.order_id.name,
                 self.name,
-                date_planned,
+                date_transfer_done,
                 next_preferred_date,
             )
             return next_preferred_date
@@ -137,7 +146,7 @@ class SaleOrderLine(models.Model):
                 self.order_id.name,
                 self.name,
             )
-        return
+        return next_preferred_date
 
     def _delay_to_days(self, number_of_days):
         """Converts a delay to a number of days."""
