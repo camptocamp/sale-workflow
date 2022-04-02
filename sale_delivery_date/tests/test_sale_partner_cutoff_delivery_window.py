@@ -440,7 +440,15 @@ class TestSaleCutoffDeliveryWindow(SavepointCase):
 
         And we set a commitment date on the sales order.
         """
-        # FIXME: computation of date_planned based on commitment_date not implemented
+        # Parameters:
+        #   - customer_lead = 4 (ignored if a commitment_date is provided)
+        #   - security_lead = 1
+        #   - date_order = "2020-03-24 18:00" (Tuesday)
+        #   - commitment_date = "2020-04-03 15:00" (Friday)
+        #   - partner's delivery time window: Monday & Friday 14:00-15:00
+        # Expected result:
+        #   - date_planned = "2020-04-02 09:00" (security lead time + cutoff)
+        #   - date_deadline = commitment_date
         partner = self.env["res.partner"].create(
             {
                 "name": "Partner cutoff",
@@ -475,11 +483,14 @@ class TestSaleCutoffDeliveryWindow(SavepointCase):
         )
 
         self.product.sale_delay = 4
-        # Before partner cutoff
+        self.env.company.security_lead = 1
         order = self._create_order(partner=partner)
         order.commitment_date = fields.Datetime.to_datetime("2020-04-03 15:00:00")
         order.action_confirm()
         picking = order.picking_ids
         self.assertEqual(
-            picking.scheduled_date, fields.Datetime.to_datetime("2020-04-03 09:00:00")
+            picking.scheduled_date, fields.Datetime.to_datetime("2020-04-02 09:00:00")
+        )
+        self.assertEqual(
+            picking.date_deadline, fields.Datetime.to_datetime("2020-04-03 15:00:00")
         )
