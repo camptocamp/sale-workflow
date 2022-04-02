@@ -41,13 +41,21 @@ class SaleOrderLine(models.Model):
         so we will be able to ship the goods to the customer in respect to the
         `commitment_date`.
         The 'date_deadline' is already set to the 'commitment_date' (that should
-        already fit the partner's time window if any).
+        preferably fit the partner's time window if any).
         """
-        # TODO
-        # 1) commitment_date - security_lead = order ready to be shipped {1}
-        # 2) {1} - workload
-        # 3) while {2} isn't a working day, remove 1 day
-        # 4) apply cutoff (with `keep_same_day` param)
+        # 1) compute the date when the transfer should be ready to be shipped
+        date_transfer_done = res["date_deadline"] - timedelta(
+            days=self.order_id.company_id.security_lead
+        )
+        res["date_planned"] = date_transfer_done
+        # 2) Find the first date in the WH calendar (by going back in the past)
+        calendar = self.order_id.warehouse_id.calendar_id
+        if calendar:
+            res["date_planned"] = calendar.plan_days(
+                -1, res["date_planned"], compute_leaves=True
+            )
+        # 3) Apply the partner or warehouse cutoff if any
+        res = self._cutoff_time_delivery_prepare_procurement_values(res)
         return res
 
     def _prepare_procurement_values_no_commitment_date(self, res):
