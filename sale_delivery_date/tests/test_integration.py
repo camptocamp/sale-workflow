@@ -92,3 +92,21 @@ class TestSaleDeliveryDate(Common):
         #   - the warehouse calendar is set from 09:00 to 17:00 GMT+2 (15:00 UTC)
         self.assertEqual(str(picking.scheduled_date), f"{FRIDAY} 00:00:00")
         self.assertEqual(str(picking.date_deadline), f"{NEXT_FRIDAY} 06:00:00")
+
+    @freeze_time(FRIDAY_BEFORE_CUTOFF)
+    def test_order_on_friday_before_cutoff_to_deliver_on_friday_commitment_date(self):
+        """Order confirmed before cut-off time on Friday to deliver on friday.
+
+        But here the delivery date is enforced by the commitment_date.
+        """
+        order = self.order_warehouse_cutoff
+        order.commitment_date = f"{NEXT_FRIDAY} 08:00:00"
+        order.action_confirm()
+        picking = order.picking_ids
+        self.assertEqual(picking.date_deadline, order.commitment_date)
+        # The expected date is when we could ship the goods at best if no
+        # commitment_date was provided (it's only an indicator for the sale user)
+        self.assertEqual(str(order.expected_date.date()), NEXT_MONDAY)
+        # The scheduled date is one day before at 08:00 UTC (takes into
+        # account the security lead time and in respect to the WH calendar)
+        self.assertEqual(str(picking.scheduled_date), f"{NEXT_THURSDAY} 08:00:00")
