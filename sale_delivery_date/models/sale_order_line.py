@@ -6,7 +6,7 @@ from datetime import datetime, time, timedelta
 
 import pytz
 
-from odoo import api, fields, models
+from odoo import api, models
 
 from odoo.addons.partner_tz.tools import tz_utils
 
@@ -142,34 +142,6 @@ class SaleOrderLine(models.Model):
         return date_planned
 
     def _get_date_deadline_with_delivery_window(self, date_planned):
-        """Update the 'date_deadline' based on the customer delivery window."""
-        date_deadline = self._prepare_procurement_values_time_windows(
-            fields.Datetime.to_datetime(date_planned)
-        )
-        if date_deadline:
-            return date_deadline
-        return date_planned
-
-    def _get_date_planned_from_date_deadline(self, date_deadline):
-        """Return the 'date_planned' from the 'date_deadline'."""
-        # Remove the security lead from the date_deadline
-        date_planned = date_deadline - timedelta(
-            days=self.order_id.company_id.security_lead
-        )
-        calendar = self.order_id.warehouse_id.calendar2_id
-        __, __, workload = self._get_delays()
-        workload_days = self._delay_to_days(workload)
-        date_planned = calendar.plan_days(
-            -workload_days, date_deadline, compute_leaves=True
-        )
-        return self._get_date_planned_with_cutoff_time(
-            date_planned,
-            # the correct day has already been computed, only change
-            # the cut-off time
-            keep_same_day=True,
-        )
-
-    def _prepare_procurement_values_time_windows(self, date_planned):
         """Return 'date_deadline' according to customer's time windows.
 
         This computation is called only if no commitment_date is set and
@@ -177,9 +149,6 @@ class SaleOrderLine(models.Model):
         It will return the effective delivery date by considering the next
         preferred delivery time window of the customer.
         """
-        if self.order_id.partner_shipping_id.delivery_time_preference != "time_windows":
-            return
-        ops = self.order_id.partner_shipping_id
         # As the 'date_planned' is the date when the work can start on the
         # transfer, we have to add the security lead of the company to get
         # the date indicating when the transfer will be ready to be shipped.
@@ -188,6 +157,9 @@ class SaleOrderLine(models.Model):
         date_transfer_done = date_planned + timedelta(
             days=self.order_id.company_id.security_lead
         )
+        if self.order_id.partner_shipping_id.delivery_time_preference != "time_windows":
+            return date_transfer_done
+        ops = self.order_id.partner_shipping_id
         next_preferred_date = ops.next_delivery_window_start_datetime(
             from_date=date_transfer_done
         )
@@ -209,6 +181,31 @@ class SaleOrderLine(models.Model):
                 self.name,
             )
         return next_preferred_date
+
+    def _get_date_planned_from_date_deadline(self, date_deadline):
+        """Return the 'date_planned' from the 'date_deadline'.
+
+        Once we know the delivery date of the customer, we are able to
+        compute the final scheduled date of the transfer by taking into
+        account the workload, the WH calendar and the cutoff time.
+        """
+        # Remove the security lead from the date_deadline
+        date_planned = date_deadline - timedelta(
+            days=self.order_id.company_id.security_lead
+        )
+        calendar = self.order_id.warehouse_id.calendar_id
+        if calendar:
+            __, __, workload = self._get_delays()
+            workload_days = self._delay_to_days(workload)
+            date_planned = calendar.plan_days(
+                -workload_days, date_planned, compute_leaves=True
+            )
+        return self._get_date_planned_with_cutoff_time(
+            date_planned,
+            # the correct day has already been computed, only change
+            # the cut-off time
+            keep_same_day=True,
+        )
 
     def _delay_to_days(self, number_of_days):
         """Converts a delay to a number of days."""
