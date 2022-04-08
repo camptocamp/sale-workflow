@@ -68,6 +68,9 @@ class SaleOrderLine(models.Model):
         res = self._cutoff_time_delivery_prepare_procurement_values(res)
         res = self._warehouse_calendar_prepare_procurement_values(res)
         res = self._delivery_window_prepare_procurement_values(res)
+        res["date_planned"] = self._get_scheduled_date_from_date_deadline(
+            res["date_deadline"]
+        )
         return res
 
     def _cutoff_time_delivery_prepare_procurement_values(self, res):
@@ -94,9 +97,6 @@ class SaleOrderLine(models.Model):
             customer_lead, security_lead, workload = self._get_delays()
             # plan_days() expect a number of days instead of a delay
             workload_days = self._delay_to_days(workload)
-            td_workload = timedelta(days=workload)
-            # Remove the workload that has been added by odoo
-            date_planned -= td_workload
             # Add the workload, with respect to the wh calendar
             res["date_planned"] = calendar.plan_days(
                 workload_days, date_planned, compute_leaves=True
@@ -114,6 +114,25 @@ class SaleOrderLine(models.Model):
         if date_deadline:
             res["date_deadline"] = date_deadline
         return res
+
+    def _get_scheduled_date_from_date_deadline(self, date_deadline):
+        """Return the 'date_planned' from the 'date_deadline'."""
+        # Remove the security lead from the date_deadline
+        date_planned = date_deadline - timedelta(
+            days=self.order_id.company_id.security_lead
+        )
+        calendar = self.order_id.warehouse_id.calendar2_id
+        __, __, workload = self._get_delays()
+        workload_days = self._delay_to_days(workload)
+        date_planned = calendar.plan_days(
+            -workload_days, date_deadline, compute_leaves=True
+        )
+        return self._prepare_procurement_values_cutoff_time(
+            date_planned,
+            # the correct day has already been computed, only change
+            # the cut-off time
+            keep_same_day=True,
+        )
 
     def _prepare_procurement_values_time_windows(self, date_planned):
         """Return 'date_deadline' according to customer's time windows.
