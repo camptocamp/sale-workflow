@@ -49,6 +49,15 @@ class TestSaleDeliveryDate(Common):
     @freeze_time(FRIDAY_AFTER_CUTOFF)
     def test_order_on_friday_after_cutoff_to_deliver_on_workdays(self):
         """Order confirmed after cut-off time on Friday to deliver on workdays."""
+        # Parameters:
+        #   - customer_lead = 1
+        #   - security_lead = 1
+        #   - date_order = "2021-08-20 08:30 UTC" (Friday)
+        #   - WH's cutoff time at 10:00 (with TZ)
+        #   - WH calendar from 9h to 17h (with TZ)
+        #   - no partner's delivery time window
+        # Expected result:
+        #   - date_planned = "2021-08-23"
         order = self.order_warehouse_cutoff
         order.action_confirm()
         picking = order.picking_ids
