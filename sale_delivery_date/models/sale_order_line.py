@@ -55,7 +55,9 @@ class SaleOrderLine(models.Model):
                 -1, res["date_planned"], compute_leaves=True
             )
         # 3) Apply the partner or warehouse cutoff if any
-        res = self._cutoff_time_delivery_prepare_procurement_values(res)
+        res["date_planned"] = self._get_date_planned_with_cutoff_time(
+            res["date_planned"]
+        )
         return res
 
     def _prepare_procurement_values_no_commitment_date(self, res):
@@ -65,57 +67,90 @@ class SaleOrderLine(models.Model):
             + timedelta(days=self.customer_lead or 0.0)
             - timedelta(days=self.order_id.company_id.security_lead)
         )
-        res = self._cutoff_time_delivery_prepare_procurement_values(res)
-        res = self._warehouse_calendar_prepare_procurement_values(res)
-        res = self._delivery_window_prepare_procurement_values(res)
-        res["date_planned"] = self._get_scheduled_date_from_date_deadline(
+        res["date_planned"] = self._get_date_planned_with_cutoff_time(
+            res["date_planned"]
+        )
+        res["date_planned"] = self._get_date_planned_with_warehouse_calendar(
+            res["date_planned"]
+        )
+        res["date_deadline"] = self._get_date_deadline_with_delivery_window(
+            res["date_planned"]
+        )
+        res["date_planned"] = self._get_date_planned_from_date_deadline(
             res["date_deadline"]
         )
         return res
 
-    def _cutoff_time_delivery_prepare_procurement_values(self, res):
-        """Apply warehouse or partner cutoff time on the date planned."""
-        date_planned = res.get("date_planned")
-        if not date_planned:
-            return res
-        new_date_planned = self._prepare_procurement_values_cutoff_time(
-            fields.Datetime.to_datetime(date_planned),
-            # if we have a commitment date, even if we are too late, respect
-            # the original planned date (but change the time), the transfer
-            # will be considered as "late"
-            keep_same_day=bool(self.order_id.commitment_date),
-        )
-        if new_date_planned:
-            res["date_planned"] = new_date_planned
-        return res
+    def _get_date_planned_with_cutoff_time(self, date_planned, keep_same_day=False):
+        """Apply the cut-off time on a planned date
 
-    def _warehouse_calendar_prepare_procurement_values(self, res):
+        The cut-off configuration is taken on the partner if set, otherwise
+        on the warehouse.
+
+        By default, if the planned date is the same day but after the cut-off,
+        the new planned date is delayed one day later. The argument
+        keep_same_day forces keeping the same day.
+        """
+        cutoff = self.order_id.get_cutoff_time()
+        partner = self.order_id.partner_shipping_id
+        if not cutoff:
+            if not self.order_id.warehouse_id.apply_cutoff:
+                _logger.debug(
+                    "No cutoff applied on order %s as partner %s is set to use "
+                    "%s and warehouse %s doesn't apply cutoff."
+                    % (
+                        self.order_id,
+                        partner,
+                        partner.order_delivery_cutoff_preference,
+                        self.order_id.warehouse_id,
+                    )
+                )
+            else:
+                _logger.warning(
+                    "No cutoff applied on order %s. %s time not applied"
+                    "on line %s."
+                    % (self.order_id, partner.order_delivery_cutoff_preference, self)
+                )
+            return date_planned
+        new_date_planned = self._get_utc_cutoff_datetime(
+            cutoff, date_planned, keep_same_day
+        )
+        _logger.debug(
+            "%s applied on order %s. Date planned for line %s"
+            " rescheduled from %s to %s"
+            % (
+                partner.order_delivery_cutoff_preference,
+                self.order_id,
+                self,
+                date_planned,
+                new_date_planned,
+            )
+        )
+        return new_date_planned
+
+    def _get_date_planned_with_warehouse_calendar(self, date_planned):
         """Update the date planned based on the warehouse calendar if any."""
-        date_planned = res.get("date_planned")
         calendar = self.order_id.warehouse_id.calendar_id
         if date_planned and calendar:
             customer_lead, security_lead, workload = self._get_delays()
             # plan_days() expect a number of days instead of a delay
             workload_days = self._delay_to_days(workload)
             # Add the workload, with respect to the wh calendar
-            res["date_planned"] = calendar.plan_days(
+            date_planned = calendar.plan_days(
                 workload_days, date_planned, compute_leaves=True
             )
-        return res
+        return date_planned
 
-    def _delivery_window_prepare_procurement_values(self, res):
+    def _get_date_deadline_with_delivery_window(self, date_planned):
         """Update the 'date_deadline' based on the customer delivery window."""
-        date_planned = res.get("date_planned")
-        if not date_planned:
-            return res
         date_deadline = self._prepare_procurement_values_time_windows(
             fields.Datetime.to_datetime(date_planned)
         )
         if date_deadline:
-            res["date_deadline"] = date_deadline
-        return res
+            return date_deadline
+        return date_planned
 
-    def _get_scheduled_date_from_date_deadline(self, date_deadline):
+    def _get_date_planned_from_date_deadline(self, date_deadline):
         """Return the 'date_planned' from the 'date_deadline'."""
         # Remove the security lead from the date_deadline
         date_planned = date_deadline - timedelta(
@@ -127,7 +162,7 @@ class SaleOrderLine(models.Model):
         date_planned = calendar.plan_days(
             -workload_days, date_deadline, compute_leaves=True
         )
-        return self._prepare_procurement_values_cutoff_time(
+        return self._get_date_planned_with_cutoff_time(
             date_planned,
             # the correct day has already been computed, only change
             # the cut-off time
@@ -225,55 +260,6 @@ class SaleOrderLine(models.Model):
     def _compute_qty_at_date(self):
         """Trigger computation of qty_at_date when expected_date is updated"""
         return super()._compute_qty_at_date()
-
-    def _prepare_procurement_values_cutoff_time(
-        self, date_planned, keep_same_day=False
-    ):
-        """Apply the cut-off time on a planned date
-
-        The cut-off configuration is taken on the partner if set, otherwise
-        on the warehouse.
-
-        By default, if the planned date is the same day but after the cut-off,
-        the new planned date is delayed one day later. The argument
-        keep_same_day forces keeping the same day.
-        """
-        cutoff = self.order_id.get_cutoff_time()
-        partner = self.order_id.partner_shipping_id
-        if not cutoff:
-            if not self.order_id.warehouse_id.apply_cutoff:
-                _logger.debug(
-                    "No cutoff applied on order %s as partner %s is set to use "
-                    "%s and warehouse %s doesn't apply cutoff."
-                    % (
-                        self.order_id,
-                        partner,
-                        partner.order_delivery_cutoff_preference,
-                        self.order_id.warehouse_id,
-                    )
-                )
-            else:
-                _logger.warning(
-                    "No cutoff applied on order %s. %s time not applied"
-                    "on line %s."
-                    % (self.order_id, partner.order_delivery_cutoff_preference, self)
-                )
-            return
-        new_date_planned = self._get_utc_cutoff_datetime(
-            cutoff, date_planned, keep_same_day
-        )
-        _logger.debug(
-            "%s applied on order %s. Date planned for line %s"
-            " rescheduled from %s to %s"
-            % (
-                partner.order_delivery_cutoff_preference,
-                self.order_id,
-                self,
-                date_planned,
-                new_date_planned,
-            )
-        )
-        return new_date_planned
 
     def _cutoff_time_delivery_expected_date(self, expected_date):
         cutoff = self.order_id.get_cutoff_time()
