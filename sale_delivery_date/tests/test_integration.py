@@ -68,30 +68,31 @@ class TestSaleDeliveryDate(Common):
     def test_order_on_friday_after_cutoff_to_deliver_on_friday(self):
         """Order confirmed after cut-off time on Friday to deliver on friday."""
         self._set_partner_time_window_to_friday(self.customer_warehouse_cutoff)
+        self.customer_warehouse_cutoff.delivery_time_window_ids[0].time_window_start = 9
         order = self.order_warehouse_cutoff
         order.action_confirm()
         picking = order.picking_ids
-        # Friday 06:00 UTC, so 08:00 with customer's TZ
-        self.assertEqual(str(order.expected_date), f"{NEXT_FRIDAY} 06:00:00")
-        # FIXME: why 15:00?
-        self.assertEqual(str(picking.scheduled_date), f"{NEXT_MONDAY} 00:00:00")
-        self.assertEqual(str(picking.date_deadline), f"{NEXT_FRIDAY} 06:00:00")
+        # Delivery date: Friday 06:00 UTC, so 08:00 with customer's TZ
+        self.assertEqual(str(order.expected_date), f"{NEXT_FRIDAY} 07:00:00")
+        self.assertEqual(str(picking.date_deadline), f"{NEXT_FRIDAY} 07:00:00")
+        # Scheduled date: Thursday 08:00 (in UTC):
+        #   - the warehouse cutoff is set to 10:00 GMT+2 (08:00 UTC)
+        self.assertEqual(str(picking.scheduled_date), f"{NEXT_THURSDAY} 08:00:00")
 
     @freeze_time(FRIDAY_BEFORE_CUTOFF)
     def test_order_on_friday_before_cutoff_to_deliver_on_friday(self):
         """Order confirmed before cut-off time on Friday to deliver on friday."""
         self._set_partner_time_window_to_friday(self.customer_warehouse_cutoff)
+        self.customer_warehouse_cutoff.delivery_time_window_ids[0].time_window_start = 9
         order = self.order_warehouse_cutoff
         order.action_confirm()
         picking = order.picking_ids
-        # Friday 06:00 UTC, so 08:00 with customer's TZ
-        self.assertEqual(str(order.expected_date), f"{NEXT_FRIDAY} 06:00:00")
-        # FIXME: why a date planned at 15:00?
-        # Friday 15:00 (in UTC):
+        # Delivery date: Friday 06:00 UTC, so 08:00 with customer's TZ
+        self.assertEqual(str(order.expected_date), f"{NEXT_FRIDAY} 07:00:00")
+        self.assertEqual(str(picking.date_deadline), f"{NEXT_FRIDAY} 07:00:00")
+        # Scheduled date: Thursday 08:00 (in UTC):
         #   - the warehouse cutoff is set to 10:00 GMT+2 (08:00 UTC)
-        #   - the warehouse calendar is set from 09:00 to 17:00 GMT+2 (15:00 UTC)
-        self.assertEqual(str(picking.scheduled_date), f"{FRIDAY} 00:00:00")
-        self.assertEqual(str(picking.date_deadline), f"{NEXT_FRIDAY} 06:00:00")
+        self.assertEqual(str(picking.scheduled_date), f"{NEXT_THURSDAY} 08:00:00")
 
     @freeze_time(FRIDAY_BEFORE_CUTOFF)
     def test_order_on_friday_before_cutoff_to_deliver_on_friday_commitment_date(self):
