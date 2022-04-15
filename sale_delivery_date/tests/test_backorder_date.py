@@ -6,27 +6,17 @@ from freezegun import freeze_time
 from .common import Common
 
 MONDAY = "2022-04-11"
-TUESDAY = "2022-04-12"
-WEDNESDAY = "2022-04-13"
 THURSDAY = "2022-04-14"
 FRIDAY = "2022-04-15"
 # The week after
-NEXT_WEDNESDAY = "2022-04-20"
 NEXT_THURSDAY = "2022-04-21"
 NEXT_FRIDAY = "2022-04-22"
-# As per Common config, those hours are in "Europe/Paris" TZ
-BEFORE_CUTOFF = "08:00:00"
+# As per Common config, those hours are in "UTC" TZ
 BEFORE_CUTOFF_UTC = "06:00:00"
-CUTOFF = "09:00:00"
 CUTOFF_UTC = "07:00:00"
-AFTER_CUTOFF = "10:00:00"
 AFTER_CUTOFF_UTC = "08:00:00"
-TIME_WINDOW_START = "08:00:00"
 TIME_WINDOW_START_UTC = "06:00:00"
-MONDAY_BEFORE_CUTOFF = f"{MONDAY} {BEFORE_CUTOFF}"
 MONDAY_BEFORE_CUTOFF_UTC = f"{MONDAY} {BEFORE_CUTOFF_UTC}"
-MONDAY_AFTER_CUTOFF = f"{MONDAY} {AFTER_CUTOFF}"
-MONDAY_AFTER_CUTOFF_UTC = f"{MONDAY} {AFTER_CUTOFF_UTC}"
 
 
 @freeze_time(MONDAY_BEFORE_CUTOFF_UTC)
@@ -53,6 +43,8 @@ class TestBackorderDate(Common):
         cls.order = cls.order_partner_cutoff
         cls.order.action_confirm()
         cls.picking = cls.order.picking_ids
+        # Here, we want to ensure that the picking date is correctly postponed
+        cls.picking.move_type = "one"
 
     @classmethod
     def _get_default_products(cls):
@@ -68,7 +60,7 @@ class TestBackorderDate(Common):
     def test_backorder_before_scheduled_date(self):
         # If we want the backorder to be delivered this week, then it has to be
         # created before monday's cutoff.
-        # If so, it will be delivered tuesday, at 07:00 (UTC)
+        # If so, it will be delivered friday, at 06:00
         with freeze_time(f"{THURSDAY} {BEFORE_CUTOFF_UTC}"):
             backorder = self._create_backorder()
         self.assertEqual(str(backorder.scheduled_date), f"{THURSDAY} {CUTOFF_UTC}")
@@ -79,7 +71,7 @@ class TestBackorderDate(Common):
     def test_backorder_after_scheduled_date(self):
         # If we want the backorder to be delivered this week, then it has to be
         # created before monday's cutoff.
-        # If so, it will be delivered tuesday, at 07:00 (UTC)
+        # If so, it will be delivered friday, at 06:00
         with freeze_time(f"{THURSDAY} {AFTER_CUTOFF_UTC}"):
             backorder = self._create_backorder()
         self.assertEqual(str(backorder.scheduled_date), f"{NEXT_THURSDAY} {CUTOFF_UTC}")
