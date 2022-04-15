@@ -12,6 +12,8 @@ from odoo.addons.partner_tz.tools import tz_utils
 
 _logger = logging.getLogger(__name__)
 
+FIND_WORKING_DAY_COUNT = 10  # To avoid infinite loops, could be increased
+
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
@@ -87,11 +89,38 @@ class SaleOrderLine(models.Model):
         account the workload, the WH calendar and the cutoff time.
         """
         # Remove the security lead from the date_deadline
+        # If there's a calendar, remove 1 day until we get to a working day.
+        # The reason for that is the parcel cannot be given to the carrier
+        # on a non-working day.
+        calendar = warehouse.calendar_id
         date_planned = date_deadline - timedelta(days=security_lead)
-        # Deduce the workload
-        date_planned = self._apply_workload(date_planned, -days, warehouse.calendar_id)
-        # the correct day has already been computed, only change the cut-off time
-        return self._apply_cutoff(date_planned, partner, warehouse, keep_same_day=True)
+        if calendar:
+            next_working_day = self._next_working_day(date_planned, calendar)
+            count = 0
+            while next_working_day.date() != date_planned.date():
+                if count > FIND_WORKING_DAY_COUNT:  # To avoid infinite loop
+                    raise exceptions.UserError(
+                        _(
+                            "Unable to find a working day matching "
+                            "customer's delivery time window."
+                        )
+                    )
+                date_planned -= timedelta(days=1)
+                next_working_day = self._next_working_day(date_planned, calendar)
+                count += 1
+        # Deduce the workload, if date_planned is after the cutoff
+        date_planned_w_cutoff = self._apply_cutoff(
+            date_planned, partner, warehouse, keep_same_day=True
+        )
+        if date_planned > date_planned_w_cutoff:
+            date_planned = self._apply_workload(
+                date_planned, -days, warehouse.calendar_id
+            )
+            # the correct day has already been computed, only change the cut-off time
+            return self._apply_cutoff(
+                date_planned, partner, warehouse, keep_same_day=True
+            )
+        return date_planned_w_cutoff
 
     @api.model
     def _apply_cutoff(self, date, partner, warehouse, keep_same_day=False):
@@ -110,9 +139,7 @@ class SaleOrderLine(models.Model):
     def _apply_delivery_window(
         self, date_planned, partner, security_lead, calendar=None
     ):
-        date_done = date_planned + timedelta(
-            days=self.order_id.company_id.security_lead
-        )
+        date_done = date_planned + timedelta(days=security_lead)
         date_done = self._next_working_day(date_done, calendar)
         if partner.delivery_time_preference != "time_windows":
             return date_done
@@ -122,7 +149,7 @@ class SaleOrderLine(models.Model):
         next_working_day = self._next_working_day(next_preferred_date, calendar)
         count = 0
         while next_working_day.date() != next_preferred_date.date():
-            if count > 10:  # To avoid infinite loop, could be increased
+            if count > FIND_WORKING_DAY_COUNT:  # To avoid infinite loop
                 raise exceptions.UserError(
                     _(
                         "Unable to find a working day matching "
