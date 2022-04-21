@@ -164,6 +164,9 @@ class SaleOrderLine(models.Model):
         date_done = self._next_working_day(date_done, calendar)
         if partner.delivery_time_preference != "time_windows":
             return date_done
+        # Only the date here is relevant, since we apply the delivery window on
+        # top of it.
+        date_done = date_done.replace(hour=0, minute=0, second=0, microsecond=0)
         next_preferred_date = partner.next_delivery_window_start_datetime(
             from_date=date_done
         )
