@@ -1,4 +1,4 @@
-# Copyright 2018 Camptocamp SA
+# Copyright 2018-2022 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import _, api, exceptions, fields, models
@@ -51,7 +51,6 @@ class ResPartner(models.Model):
                 _("You can't set a credit point lower than 0")
             )
 
-    @api.multi
     def action_update_credit_point(self):
         """Open update credit point wizard."""
         self.ensure_one()
