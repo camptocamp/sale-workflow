@@ -1,14 +1,20 @@
 # Do NOT update manually; changes here will be overwritten by Copier
-_commit: v1.3.6
+_commit: v1.7.0
 _src_path: gh:oca/oca-addons-repo-template
-ci: Travis
+ci: GitHub
 dependency_installation_mode: PIP
 generate_requirements_txt: true
 include_wkhtmltopdf: false
 odoo_version: 14.0
-rebel_module_groups: []
-repo_description: 'TODO: add repo description.'
-repo_name: sale-workflow
+org_name: Odoo Community Association (OCA)
+org_slug: OCA
+rebel_module_groups:
+- sale_order_line_sequence
+repo_description: This project aim to deal with modules related to manage sale and
+    their related workflow.
+repo_name: Odoo Sales, Workflow and Organization
 repo_slug: sale-workflow
+repo_website: https://github.com/OCA/sale-workflow
 travis_apt_packages: []
 travis_apt_sources: []
+
