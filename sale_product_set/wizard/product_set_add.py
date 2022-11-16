@@ -25,8 +25,9 @@ class ProductSetAdd(models.TransientModel):
     )
     product_set_line_ids = fields.Many2many(
         "product.set.line",
-        "Product set lines",
+        string="Product set lines",
         required=True,
+        store=True,
         ondelete="cascade",
         compute="_compute_product_set_line_ids",
         readonly=False,
@@ -83,7 +84,7 @@ class ProductSetAdd(models.TransientModel):
         return self.product_set_id.partner_id
 
     def add_set(self):
-        """ Add product set, multiplied by quantity in sale order line """
+        """Add product set, multiplied by quantity in sale order line"""
         self._check_partner()
         order_lines = self._prepare_order_lines()
         if order_lines:
@@ -93,16 +94,14 @@ class ProductSetAdd(models.TransientModel):
     def _prepare_order_lines(self):
         max_sequence = self._get_max_sequence()
         order_lines = []
-        for set_line in self._get_lines():
-            order_lines.append(
-                (
-                    0,
-                    0,
-                    self.prepare_sale_order_line_data(
-                        set_line, max_sequence=max_sequence
-                    ),
-                )
-            )
+        for seq, set_line in enumerate(self._get_lines(), start=1):
+            values = self.prepare_sale_order_line_data(set_line)
+            # When we play with sequence widget on a set of product,
+            # it's possible to have a negative sequence.
+            # In this case, the line is not added at the correct place.
+            # So we have to force it with the order of the line.
+            values.update({"sequence": max_sequence + seq})
+            order_lines.append((0, 0, values))
         return order_lines
 
     def _get_max_sequence(self):
