@@ -9,6 +9,7 @@ class ProductPackaging(models.Model):
     can_be_sold = fields.Boolean(
         string="Can be sold", compute="_compute_can_be_sold", readonly=False, store=True
     )
+    active = fields.Boolean(default=True)
 
     force_sale_qty = fields.Boolean(
         string="Force sale quantity",
