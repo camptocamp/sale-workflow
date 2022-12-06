@@ -7,7 +7,7 @@ from odoo import fields, models
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    customer_ref = fields.Char("Customer Ref.")
+    customer_ref = fields.Char(string="Customer Ref.")
 
     def _prepare_procurement_values(self, group_id=False):
         values = super()._prepare_procurement_values(group_id)
