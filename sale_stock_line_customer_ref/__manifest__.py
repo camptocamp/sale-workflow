@@ -18,6 +18,7 @@
         "views/stock_move.xml",
         "views/stock_move_line.xml",
         "views/stock_package_level.xml",
+        "views/stock_quant_package.xml",
     ],
     "license": "AGPL-3",
     "installable": True,
