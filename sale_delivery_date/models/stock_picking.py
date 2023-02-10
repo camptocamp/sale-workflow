@@ -30,11 +30,11 @@ class StockPicking(models.Model):
             # cannot be satisfied. Therefore, we need to recompute move's dates
             if picking.scheduled_date < now:
                 for line in picking.move_lines:
-                    dates = line._get_delivery_dates(from_date=now)
+                    dates = line._get_delivery_dates(from_date=now, backorder=True)
                     line.write(dates)
         return res
 
-    def _compute_expected_delivery_date(self):
+    def _compute_expected_delivery_date(self, backorder=False):
         """Computes the expected delivery date.
 
         In some cases, the order expected_date and commitment_date
@@ -52,7 +52,10 @@ class StockPicking(models.Model):
         today = fields.Date.today()
         for record in self:
             delivery_date = False
-            date_deadline = record.date_deadline
+            if backorder:
+                date_deadline = record.date_deadline
+            else:
+                date_deadline = record.sale_id.commitment_date
             if date_deadline and date_deadline.date() >= today:
                 delivery_date = date_deadline
             if not delivery_date:
