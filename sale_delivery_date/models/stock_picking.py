@@ -52,7 +52,10 @@ class StockPicking(models.Model):
         today = fields.Date.today()
         for record in self:
             delivery_date = False
-            date_deadline = record.date_deadline
+            if record.backorder_id:
+                date_deadline = record.date_deadline
+            else:
+                date_deadline = record.sale_id.commitment_date
             if date_deadline and date_deadline.date() >= today:
                 delivery_date = date_deadline
             if not delivery_date:
