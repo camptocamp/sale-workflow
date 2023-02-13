@@ -3,11 +3,40 @@
 
 from datetime import date
 
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class Pricelist(models.Model):
     _inherit = "product.pricelist"
+
+    parent_pricelist_ids = fields.Many2many(
+        "product.pricelist", compute="_compute_parent_pricelist_ids"
+    )
+    is_pricelist_cache_computed = fields.Boolean()
+    is_pricelist_cache_available = fields.Boolean(
+        compute="_compute_is_pricelist_cache_available"
+    )
+
+    def _compute_parent_pricelist_ids(self):
+        for record in self:
+            record.parent_pricelist_ids = record._get_parent_pricelists()
+
+    @api.depends(
+        "is_pricelist_cache_computed",
+        "item_ids",
+        "item_ids.applied_on",
+        "item_ids.base",
+        "item_ids.base_pricelist_id",
+        "item_ids.base_pricelist_id.is_pricelist_cache_computed",
+    )
+    def _compute_is_pricelist_cache_available(self):
+        for record in self:
+            record.is_pricelist_cache_available = (
+                record.is_pricelist_cache_computed
+                and all(
+                    record.parent_pricelist_ids.mapped("is_pricelist_cache_computed")
+                )
+            )
 
     @api.model_create_multi
     def create(self, vals_list):
