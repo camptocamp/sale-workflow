@@ -1,6 +1,6 @@
 from odoo import _, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools.float_utils import float_compare
+from odoo.tools.float_utils import float_compare, float_round
 
 
 class SaleInvoicePlan(models.Model):
@@ -112,6 +112,8 @@ class SaleInvoicePlan(models.Model):
             else:
                 plan_qty = order_line.product_uom_qty * (percent / 100)
                 prec = order_line.product_uom.rounding
+                if plan_qty:
+                    plan_qty = float_round(plan_qty, precision_rounding=prec)
                 if float_compare(plan_qty, line.quantity, prec) == 1:
                     raise ValidationError(
                         _(
@@ -122,4 +124,5 @@ class SaleInvoicePlan(models.Model):
                     )
                 line.write({"quantity": plan_qty})
         # Call this method to recompute dr/cr lines
+        move.line_ids.filtered("exclude_from_invoice_tab").unlink()
         move._move_autocomplete_invoice_lines_values()
