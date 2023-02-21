@@ -25,12 +25,22 @@ class TestAutoWorkflowWithDelay(TestCommon, TestAutomaticWorkflowMixin):
             )
         )
 
-    def test_validate_sale_order(self):
+    def test_not_validate_sale_order_with_delay(self):
         workflow = self.create_full_automatic()
         workflow.validate_order_with_delay = True
         self.sale = self.create_sale_order(workflow)
         self.env["automatic.workflow.job"].run()
         self.assertEqual(self.sale.state, "draft")
+        # Standard flow validates fine.
         workflow.validate_order_with_delay = False
         self.env["automatic.workflow.job"].run()
+        self.assertEqual(self.sale.state, "sale")
+
+    def test_validate_sale_order_with_delay(self):
+        workflow = self.create_full_automatic()
+        workflow.validate_order_with_delay = True
+        self.sale = self.create_sale_order(workflow)
+        self.env["automatic.workflow.job"].run()
+        self.assertEqual(self.sale.state, "draft")
+        self.env["automatic.workflow.job"].run_with_delay()
         self.assertEqual(self.sale.state, "sale")
