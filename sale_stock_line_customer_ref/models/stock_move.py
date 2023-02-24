@@ -12,6 +12,7 @@ class StockMove(models.Model):
         compute="_compute_customer_ref_sale_line_id",
         string="Sale Line With Customer Ref.",
         store=True,
+        index=True,
     )
     customer_ref = fields.Char(compute="_compute_customer_ref", store=True)
 
