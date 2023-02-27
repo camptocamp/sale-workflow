@@ -26,8 +26,7 @@ class AutomaticWorkflowJob(models.Model):
 
     def _validate_sale_orders(self, order_filter):
         if self.env.context.get("sale_workflow_validate_with_delay"):
-            if not self.env.context.get("sale_workflow_job_delayed"):
-                return
+            return
         return super()._validate_sale_orders(order_filter)
 
     @api.model
