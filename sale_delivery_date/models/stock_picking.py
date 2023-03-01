@@ -24,13 +24,13 @@ class StockPicking(models.Model):
 
     def _create_backorder(self):
         res = super()._create_backorder()
-        now = fields.Datetime.now()
+        today = fields.Date.today()
         for picking in res:
             # If the scheduled_date is before the current datetime, then date_deadline
             # cannot be satisfied. Therefore, we need to recompute move's dates
-            if picking.scheduled_date < now:
+            if picking.scheduled_date.date() < today:
                 for line in picking.move_lines:
-                    dates = line._get_delivery_dates(from_date=now)
+                    dates = line._get_delivery_dates(from_date=fields.Datetime.now())
                     line.write(dates)
         return res
 
