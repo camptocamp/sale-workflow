@@ -14,11 +14,9 @@ class SaleOrder(models.Model):
 
     @api.onchange("partner_id")
     def onchange_partner_id(self):
-        res = super().onchange_partner_id()
         self.update(
             {
                 "incoterm": self.partner_id.sale_incoterm_id.id,
                 "incoterm_address_id": self.partner_id.sale_incoterm_address_id.id,
             }
         )
-        return res
