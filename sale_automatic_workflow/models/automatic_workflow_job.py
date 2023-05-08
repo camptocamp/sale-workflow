@@ -229,9 +229,14 @@ class AutomaticWorkflowJob(models.Model):
             )
 
     @api.model
+    def _workflow_process_to_run_domain(self):
+        return []
+
+    @api.model
     def run(self):
         """ Must be called from ir.cron """
         sale_workflow_process = self.env["sale.workflow.process"]
-        for sale_workflow in sale_workflow_process.search([]):
+        domain = self._workflow_process_to_run_domain()
+        for sale_workflow in sale_workflow_process.search(domain):
             self.run_with_workflow(sale_workflow)
         return True
