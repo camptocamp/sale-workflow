@@ -1,1 +1,2 @@
 odoo_test_helper
+odoo-addon-web_action_conditionable @git+https://github.com/OCA/web@refs/pull/2435/head#subdirectory=setup/web_action_conditionable
