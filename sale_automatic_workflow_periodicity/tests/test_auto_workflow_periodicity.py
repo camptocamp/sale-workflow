@@ -14,7 +14,7 @@ from odoo.addons.sale_automatic_workflow.tests.common import (
 
 
 @tagged("post_install", "-at_install")
-class TestAutoWorkflowFrequency(TestCommon, TestAutomaticWorkflowMixin):
+class TestAutoWorkflowPeriodicity(TestCommon, TestAutomaticWorkflowMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -33,7 +33,7 @@ class TestAutoWorkflowFrequency(TestCommon, TestAutomaticWorkflowMixin):
         """Check sales are delayed processing."""
         workflow = self.create_full_automatic()
         # Execute every 15 minutes
-        workflow.execute_every = 900
+        workflow.periodicity = 900
         workflow.next_execution = False
         self.sale1 = self.create_sale_order(workflow)
         # Fist execution at 12:00
@@ -50,21 +50,21 @@ class TestAutoWorkflowFrequency(TestCommon, TestAutomaticWorkflowMixin):
             self.env["automatic.workflow.job"].run()
         self.assertEqual(self.sale2.state, "sale")
 
-    def test_change_frequency_reset_next_exceution(self):
-        """Check changing the frequency does reset the next execution."""
+    def test_change_period_reset_next_exceution(self):
+        """Check changing the period does reset the next execution."""
         workflow = self.create_full_automatic()
         # Execute every 15 minutes
-        workflow.execute_every = 900
+        workflow.periodicity = 900
         workflow.next_execution = False
         self.sale1 = self.create_sale_order(workflow)
         with freeze_time("2023-05-08 12:00:00"):
             self.env["automatic.workflow.job"].run()
         self.assertEqual(self.sale1.state, "sale")
         self.assertTrue(workflow.next_execution)
-        workflow.execute_every = 0
+        workflow.periodicity = 0
         self.assertFalse(workflow.next_execution)
         with freeze_time("2023-05-08 12:30:00"):
-            workflow.execute_every = 900
+            workflow.periodicity = 900
         self.assertEqual(
             workflow.next_execution.strftime("%Y-%m-%d %H:%M:%S"), "2023-05-08 12:45:00"
         )
@@ -72,9 +72,9 @@ class TestAutoWorkflowFrequency(TestCommon, TestAutomaticWorkflowMixin):
     def test_enforce_on_creation_time(self):
         workflow = self.create_full_automatic()
         # Execute every 15 minutes
-        workflow.execute_every = 900
+        workflow.periodicity = 900
         workflow.next_execution = False
-        workflow.check_creation_time = True
+        workflow.periodicity_check_create_date = True
         self.sale1 = self.create_sale_order(workflow)
         create_date = self.sale1.create_date
         # Less than 15 minutes since the sale has been created

@@ -9,23 +9,23 @@ from odoo import fields, models
 class SaleWorkflowProcess(models.Model):
     _inherit = "sale.workflow.process"
 
-    execute_every = fields.Integer(
+    periodicity = fields.Integer(
         string="Run every (in seconds)",
-        help="Sets a frequency for this workflow to be executed (in seconds)",
+        help="Sets a periodicity for this workflow to be executed (in seconds)",
     )
     next_execution = fields.Datetime(readonly=True)
-    check_creation_time = fields.Boolean(
+    periodicity_check_create_date = fields.Boolean(
         string="Enforce on creation time",
         help="When checked only sales created before the last execution will be processed.",
     )
 
     def write(self, vals):
-        if "execute_every" in vals.keys():
-            execute_every = vals["execute_every"]
-            if execute_every == 0:
+        if "periodicity" in vals.keys():
+            periodicity = vals["periodicity"]
+            if periodicity == 0:
                 vals["next_execution"] = False
             else:
                 vals["next_execution"] = fields.Datetime.now() + timedelta(
-                    seconds=execute_every
+                    seconds=periodicity
                 )
         return super().write(vals)

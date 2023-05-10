@@ -10,10 +10,13 @@
     <field name="arch" type="xml">
 
         <group name="sale_order_confirm" position="before">
-          <group name="workflow_frequency_exec" string="Workflow execution frequency">
-            <field name="execute_every" />
+          <group
+                    name="workflow_periodicity_exec"
+                    string="Workflow execution periodicity"
+                >
+            <field name="periodicity" />
             <field name="next_execution" />
-            <field name="check_creation_time" />
+            <field name="periodicity_check_create_date" />
           </group>
         </group>
 

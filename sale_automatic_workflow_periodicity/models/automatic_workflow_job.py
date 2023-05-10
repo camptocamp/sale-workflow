@@ -11,9 +11,9 @@ class AutomaticWorkflowJob(models.Model):
 
     def run_with_workflow(self, sale_workflow):
         res = super().run_with_workflow(sale_workflow)
-        if sale_workflow.execute_every:
+        if sale_workflow.periodicity:
             sale_workflow.next_execution = datetime.now() + timedelta(
-                seconds=sale_workflow.execute_every
+                seconds=sale_workflow.periodicity
             )
         return res
 
@@ -21,22 +21,22 @@ class AutomaticWorkflowJob(models.Model):
     def _workflow_process_to_run_domain(self):
         return [
             "|",
-            ("execute_every", "=", 0),
+            ("periodicity", "=", 0),
             "|",
             "&",
-            ("execute_every", ">", 0),
+            ("periodicity", ">", 0),
             ("next_execution", "<=", datetime.now()),
             ("next_execution", "=", False),
         ]
 
     def _sale_workflow_domain(self, workflow):
         domain = super()._sale_workflow_domain(workflow)
-        if workflow.check_creation_time:
+        if workflow.periodicity_check_create_date:
             domain.append(
                 (
                     "create_date",
                     "<",
-                    datetime.now() - timedelta(seconds=workflow.execute_every),
+                    datetime.now() - timedelta(seconds=workflow.periodicity),
                 )
             )
         return domain
