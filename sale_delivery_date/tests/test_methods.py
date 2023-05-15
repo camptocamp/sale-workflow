@@ -42,7 +42,11 @@ class TestMethods(Common):
     @classmethod
     def _set_delivery_time_preference(cls, partner, delivery_time_preference):
         if delivery_time_preference == "time_windows":
-            cls._set_partner_time_window_to_friday(partner)
+            # fridays from 8 to 18
+            weekday_numbers = (4,)
+            hour_from = 8.0
+            hour_to = 18.0
+            cls._set_partner_time_window(partner, weekday_numbers, hour_from, hour_to)
             return
         partner.delivery_time_preference = delivery_time_preference
 
