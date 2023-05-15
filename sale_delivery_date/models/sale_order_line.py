@@ -28,6 +28,15 @@ class SaleOrderLine(models.Model):
     # OVERRIDES
     # =====
 
+    def _action_launch_stock_rule(self, previous_product_uom_qty=False):
+        # Add a context key, so we know in `_prepare_procurement_values` that we
+        # might have to update the date based on today instead of the order date
+        if previous_product_uom_qty:
+            self = self.with_context(updated_line_qty=True)
+        return super(SaleOrderLine, self)._action_launch_stock_rule(
+            previous_product_uom_qty
+        )
+
     def _prepare_procurement_values(self, group_id=False):
         # Here, we need to set date_deadline and date_planned correctly
         # res["date_planned"] is order.date_order + lead_time
@@ -45,6 +54,12 @@ class SaleOrderLine(models.Model):
             res = self._prepare_procurement_values_commitment_date(res)
         else:
             res = self._prepare_procurement_values_no_commitment_date(res)
+        # If `updated_line_qty` context key is set, and now is after the computed
+        # date planned, then we're late, and should postpone the delivery dates
+        now = datetime.now()
+        late = res["date_planned"] <= now
+        if self.env.context.get("updated_line_qty") and late:
+            res = self._prepare_procurement_values_no_commitment_date(res, now)
         return res
 
     def _expected_date(self):
@@ -106,7 +121,7 @@ class SaleOrderLine(models.Model):
         res["date_deadline"] = date_deadline
         return res
 
-    def _prepare_procurement_values_no_commitment_date(self, res):
+    def _prepare_procurement_values_no_commitment_date(self, res, date_from=None):
         # See graph in docs/
         #
         # date_deadline computation:
@@ -152,7 +167,6 @@ class SaleOrderLine(models.Model):
         # - security_lead represents the delivery lead time
         # - workload represents the time needed to process the order
         #   before sending the goods.
-        date_deadline = res["date_deadline"]
         delays = self._get_delays()
         cutoff = self.order_id.get_cutoff_time()
         calendar = self.order_id.warehouse_id.calendar2_id
@@ -160,9 +174,11 @@ class SaleOrderLine(models.Model):
         calendar = self.order_id.warehouse_id.calendar2_id
         #
         customer_lead, __, __ = delays
-        date_order = self._deduct_delay(date_deadline, customer_lead)
+        if not date_from:
+            date_deadline = res["date_deadline"]
+            date_from = self._deduct_delay(date_deadline, customer_lead)
         earliest_expedition_date = self._expedition_date_from_date_order(
-            date_order, delays, calendar=calendar, cutoff=cutoff
+            date_from, delays, calendar=calendar, cutoff=cutoff
         )
         delivery_date = self._delivery_date_from_expedition_date(
             earliest_expedition_date, partner, delays
