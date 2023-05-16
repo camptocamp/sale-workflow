@@ -6,7 +6,7 @@
         "Postpones delivery dates based on customer preferences, "
         "and/or warehouse configuration."
     ),
-    "version": "14.0.1.0.1",
+    "version": "14.0.1.1.0",
     "category": "Sales",
     "website": "https://github.com/OCA/sale-workflow",
     "author": "Camptocamp SA, Odoo Community Association (OCA)",
@@ -34,4 +34,5 @@
         "python": ["openupgradelib"],
     },
     "pre_init_hook": "pre_init_hook",
+    "development_status": "Alpha",
 }
