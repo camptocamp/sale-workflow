@@ -166,3 +166,26 @@ class Common(SavepointCase):
                 ],
             }
         )
+
+    @classmethod
+    def _set_partner_time_window_working_days(cls, partner):
+        partner.write(
+            {
+                "delivery_time_preference": "workdays",
+                "delivery_time_window_ids": [(5, 0, 0)],
+            }
+        )
+
+    @classmethod
+    def _add_calendar_leaves(cls, calendar, leave_dates=()):
+        return cls.env["resource.calendar.leaves"].create(
+            [
+                {
+                    "name": f"leave {date}",
+                    "date_from": f"{date} 00:00:00",
+                    "date_to": f"{date} 23:59:59",
+                    "calendar_id": calendar.id,
+                }
+                for date in leave_dates
+            ]
+        )

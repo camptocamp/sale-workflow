@@ -40,7 +40,7 @@ class StockMove(models.Model):
             from_date, delays, calendar=calendar, cutoff=cutoff
         )
         delivery_date = sale_line_model._delivery_date_from_expedition_date(
-            earliest_expedition_date, partner, delays
+            earliest_expedition_date, partner, calendar, delays
         )
         res["date_deadline"] = delivery_date
         expedition_date = sale_line_model._expedition_date_from_delivery_date(
