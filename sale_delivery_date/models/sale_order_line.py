@@ -77,7 +77,7 @@ class SaleOrderLine(models.Model):
         )
         partner = self.order_id.partner_shipping_id
         delivery_date = self._delivery_date_from_expedition_date(
-            expedition_date, partner, delays
+            expedition_date, partner, calendar, delays
         )
         return delivery_date
 
@@ -181,7 +181,7 @@ class SaleOrderLine(models.Model):
             date_from, delays, calendar=calendar, cutoff=cutoff
         )
         delivery_date = self._delivery_date_from_expedition_date(
-            earliest_expedition_date, partner, delays
+            earliest_expedition_date, partner, calendar, delays
         )
         res["date_deadline"] = delivery_date
         expedition_date = self._expedition_date_from_delivery_date(
@@ -235,12 +235,16 @@ class SaleOrderLine(models.Model):
         return earliest_delivery_date_tz.replace(tzinfo=None)
 
     @api.model
-    def _delivery_date_from_expedition_date(self, expedition_date, partner, delays):
+    def _delivery_date_from_expedition_date(
+        self, expedition_date, partner, calendar, delays
+    ):
         __, security_lead, __ = delays
         # Since the delivery lead is up to the carrier, warehouse calendar is irrelevant.
         # TODO use float_compare, what is the right rounding for days?
         if security_lead > 0:
-            earliest_delivery_datetime = self._add_delay(expedition_date, security_lead)
+            earliest_delivery_datetime = self._add_days(
+                expedition_date, security_lead, calendar=calendar
+            )
             # TODO /!\ not sure about this.
             tz_string = self.order_id.partner_id.tz or "UTC"
             earliest_delivery_date_naive = self._get_naive_date_from_datetime(
@@ -310,6 +314,11 @@ class SaleOrderLine(models.Model):
     # ======
     # Generic date methods
     # ======
+    @api.model
+    def _add_days(self, date_from, days, calendar=False):
+        if calendar:
+            return calendar.plan_days(days, date_from, compute_leaves=True)
+        return date_from + timedelta(days=days)
 
     @api.model
     def _add_delay(self, date_from, delay, calendar=False):

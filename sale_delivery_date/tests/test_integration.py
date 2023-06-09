@@ -100,3 +100,15 @@ class TestSaleDeliveryDate(Common):
         picking = order.picking_ids
         self.assertEqual(str(picking.scheduled_date.date()), NEXT_THURSDAY)
         self.assertEqual(str(order.expected_date.date()), NEXT_FRIDAY)
+
+    @freeze_time("2023-06-06 07:55:00")
+    def test_order_on_monday_before_cutoff_with_leaves(self):
+        expected_work_start_date = "2023-06-06"
+        expected_delivery_date = "2023-06-09"
+        self._set_partner_time_window_working_days(self.customer_warehouse_cutoff)
+        self._add_calendar_leaves(self.calendar, ["2023-06-07", "2023-06-08"])
+        order = self.order_warehouse_cutoff
+        order.action_confirm()
+        picking = order.picking_ids
+        self.assertEqual(str(picking.scheduled_date.date()), expected_work_start_date)
+        self.assertEqual(str(order.expected_date.date()), expected_delivery_date)
