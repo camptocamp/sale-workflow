@@ -57,30 +57,20 @@ class StockPicking(models.Model):
         We still try to keep this priority:
             commitment_date > expected_date > date_done > scheduled_date
         """
-        today = fields.Date.today()
+        now = fields.Datetime.now()
+        sale_line_model = self.env["sale.order.line"]
         for record in self:
-            delivery_date = False
             commitment_date = record.sale_id.commitment_date
-            expected_date = record.sale_id.expected_date
-            # If we commited to deliver on a given date, we never fall back
-            # on the expected_date.
-            # The reason for that is that we might have set and unrealistic
-            # commitment_date at first.
-            # In such case, it's normal to be late, and we do not want to postpone.
-            if commitment_date:
-                if commitment_date.date() >= today:
-                    delivery_date = commitment_date
-            elif expected_date and expected_date.date() >= today:
-                delivery_date = expected_date
-            if not delivery_date:
-                date_done = record.date_done or record.scheduled_date
-                sale_line_model = self.env["sale.order.line"]
-                partner = self.partner_id
-                warehouse = self.location_id.get_warehouse()
-                delays = self._get_delays()
-                delivery_date = sale_line_model._delivery_date_from_expedition_date(
-                    date_done, partner, warehouse.calendar2_id, delays
-                )
+            # Recompute everytime, and compare the new expected delivery date
+            # with the commitment date, as we do not want to deliver early.
+            partner = record.partner_id
+            warehouse = record.location_id.get_warehouse()
+            delays = record._get_delays()
+            delivery_date = sale_line_model._delivery_date_from_expedition_date(
+                now, partner, warehouse.calendar2_id, delays
+            )
+            if commitment_date and commitment_date > delivery_date:
+                delivery_date = commitment_date
             record.expected_delivery_date = delivery_date
 
     @api.depends("location_id")

@@ -195,15 +195,13 @@ class TestSaleDeliveryDate(Common):
         # The scheduled date is the start of the previous attendance.
         # This is when we should have started working on this.
         self.assertEqual(str(picking.scheduled_date), "2023-07-04 08:00:00") # 10:00 UTC
-        # Before confirmation, expected_delivery_date is:
-        # scheduled_date + security_lead with time_window applied
+        # date_deadline is immutable.
+        # However, there might be cases where you cannot use a date in the past,
+        # a carrier for instance, whose API would refuse any date in the past.
+        # For suche cases, we can use picking.expected_delivery_date, which represents
+        # the delivery date, based on now as an expedition date, which takes into
+        # account customer delivery preferences.
+        # On 2023-07-06 16:00:00, best delivery date is the day after.
         self.assertEqual(
-            str(picking.expected_delivery_date),
-            "2023-07-05 05:30:00" # 07:30 UTC
+            str(picking.expected_delivery_date), "2023-07-07 05:30:00" # 07:30 UTC
         )
-        # But once it's confirmed, it's:
-        # date_done + security_lead with time windows applied
-        picking.move_lines.quantity_done = 10.0
-        picking._action_done()
-        self.assertEqual(str(picking.expected_delivery_date), "2023-07-07 05:30:00")
-
