@@ -1,7 +1,7 @@
 # Copyright 2021 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
 
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from psycopg2 import sql
 
@@ -22,6 +22,26 @@ class StockPicking(models.Model):
     )
     expected_delivery_date = fields.Datetime(compute="_compute_expected_delivery_date")
 
+    def _get_delays(self):
+        self.ensure_one()
+        sale_delays = self.move_lines.product_id.mapped("sale_delay")
+        if sale_delays:
+            # Depending on the move_type, customer_lead is either the smallest
+            # or the biggest one among product's sale_delays.
+            if self.move_type == "direct":
+                min_delay = min(sale_delays)
+                # As we cannot have negative delays
+                customer_lead = max(min_delay, 0.0)
+            else:
+                max_delay = max(sale_delays)
+                customer_lead = max(max_delay, 0.0)
+        else:
+            customer_lead = 0.0
+        # Otherwise, this is the same than _get_delays() on sale_order_line
+        security_lead = max(self.company_id.security_lead or 0.0, 0.0)
+        workload = max(customer_lead - security_lead, 0.0)
+        return customer_lead, security_lead, workload
+
     def _compute_expected_delivery_date(self):
         """Computes the expected delivery date.
 
@@ -37,20 +57,26 @@ class StockPicking(models.Model):
         We still try to keep this priority:
             commitment_date > expected_date > date_done > scheduled_date
         """
-        today = fields.Date.today()
+        now = fields.Datetime.now()
+        sale_line_model = self.env["sale.order.line"]
         for record in self:
-            delivery_date = False
-            commitment_date = record.sale_id.commitment_date
-            if commitment_date and commitment_date.date() >= today:
-                delivery_date = commitment_date
-            if not delivery_date:
-                expected_date = record.sale_id.expected_date
-                if expected_date and expected_date.date() >= today:
-                    delivery_date = expected_date
-            if not delivery_date:
-                date_done = record.date_done or record.scheduled_date
-                security_lead = record.company_id.security_lead
-                delivery_date = fields.Datetime.add(date_done, days=security_lead)
+            sale_order = record.sale_id
+            delivery_date = record.date_deadline or record.date_done
+            # TODO: At some point, we might need a carrier cutoff or something.
+            late_to_ship = now.date() > record.scheduled_date.date()
+            if late_to_ship:
+                warehouse = record.location_id.get_warehouse()
+                calendar = warehouse.calendar2_id
+                next_ship_date = sale_line_model._postpone_to_working_day(
+                    now, calendar=calendar
+                )
+                delivery_datetime_aware = sale_line_model._add_delay(
+                    next_ship_date, 1, calendar=calendar
+                )
+                tz_string = record.partner_id.tz or "UTC"
+                delivery_date = sale_line_model._get_naive_date_from_datetime(
+                    delivery_datetime_aware, tz_string
+                )
             record.expected_delivery_date = delivery_date
 
     @api.depends("location_id")
@@ -147,4 +173,30 @@ class StockPicking(models.Model):
                     )
                     % sec_lead_time
                 )
+        return res
+
+    def get_cutoff_time(self):
+        self.ensure_one()
+        partner = self.partner_id
+        wh = self.location_id.get_warehouse()
+        delivery_preference = partner.order_delivery_cutoff_preference
+        if delivery_preference == "warehouse_cutoff" and wh.apply_cutoff:
+            cutoff = wh.get_cutoff_time()
+        elif delivery_preference == "partner_cutoff":
+            # Cutoff time is related to the warehouse, not to the customer.
+            cutoff = partner.get_cutoff_time(tz=wh.tz)
+        else:
+            cutoff = {}
+        return cutoff
+
+    def _create_backorder(self):
+        res = super()._create_backorder()
+        now = fields.Datetime.now()
+        for picking in res:
+            # If the scheduled_date is before the current datetime, then date_deadline
+            # cannot be satisfied. Therefore, we need to recompute move's dates
+            if picking.scheduled_date < now:
+                for line in picking.move_lines:
+                    dates = line._get_delivery_dates(from_date=now)
+                    line.write(dates)
         return res
