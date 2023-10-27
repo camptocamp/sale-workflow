@@ -15,7 +15,7 @@ class SaleOrderLine(models.Model):
     )
     def _check_product_packaging_sell_only_by_packaging(self):
         for line in self:
-            if not line.product_id.sell_only_by_packaging:
+            if not line.product_id.sell_only_by_packaging or not line.product_uom_qty:
                 continue
 
             if (
