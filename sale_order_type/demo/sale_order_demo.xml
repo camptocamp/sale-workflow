@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<odoo  noupdate="1">
-    <record model="sale.order" id="sale.sale_order_1">
+<odoo noupdate="1">
+    <record id="sale.sale_order_1" model="sale.order">
         <field name="type_id" ref="normal_sale_type" />
     </record>
     <record model="sale.order" id="sale.sale_order_2">

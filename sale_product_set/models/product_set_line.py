@@ -1,32 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright 2015 Anybox S.A.S
-# Copyright 2016 Camptocamp SA
+# Copyright 2016-2018 Camptocamp SA
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 from odoo import fields, models
-from odoo.addons import decimal_precision as dp
 
 
 class ProductSetLine(models.Model):
-    _name = 'product.set.line'
-    _description = 'Product set line'
-    _rec_name = 'product_id'
-    _order = 'sequence'
+    _inherit = "product.set.line"
 
-    product_id = fields.Many2one(
-        'product.product', domain=[('sale_ok', '=', True)],
-        string='Product', required=True)
-    quantity = fields.Float(
-        string='Quantity',
-        digits=dp.get_precision('Product Unit of Measure'),
-        required=True,
-        default=1
-    )
-    product_set_id = fields.Many2one(
-        'product.set',
-        string='Set',
-        ondelete='cascade',
-    )
-    sequence = fields.Integer(
-        string='Sequence',
-        required=True,
-        default=0,
-    )
+    discount = fields.Float(string="Discount (%)", digits="Discount", default=0.0)
+
+    def prepare_sale_order_line_values(self, order, quantity, max_sequence=0):
+        self.ensure_one()
+        return {
+            "order_id": order.id,
+            "product_id": self.product_id.id,
+            "product_uom_qty": self.quantity * quantity,
+            "product_uom": self.product_id.uom_id.id,
+            "sequence": max_sequence + self.sequence,
+            "discount": self.discount,
+            "company_id": self.company_id.id,
+        }

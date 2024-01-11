@@ -1,7 +1,7 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * sale_automatic_workflow_payment_mode
-# 
+#
 # Translators:
 # OCA Transbot <transbot@odoo-community.org>, 2016
 msgid ""
@@ -9,61 +9,57 @@ msgstr ""
 "Project-Id-Version: Odoo Server 9.0c\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-08-24 02:46+0000\n"
-"PO-Revision-Date: 2016-08-24 02:46+0000\n"
-"Last-Translator: OCA Transbot <transbot@odoo-community.org>, 2016\n"
-"Language-Team: Chinese (China) (https://www.transifex.com/oca/teams/23907/zh_CN/)\n"
+"PO-Revision-Date: 2019-09-17 16:58+0000\n"
+"Last-Translator: 黎伟杰 <674416404@qq.com>\n"
+"Language-Team: Chinese (China) (https://www.transifex.com/oca/teams/23907/"
+"zh_CN/)\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.8\n"
 
 #. module: sale_automatic_workflow_payment_mode
-#: model:ir.model.fields,field_description:sale_automatic_workflow_payment_mode.field_account_payment_mode_workflow_process_id
+#: model:ir.model.fields,field_description:sale_automatic_workflow_payment_mode.field_account_payment_mode__workflow_process_id
+#: model:ir.model.fields,field_description:sale_automatic_workflow_payment_mode.field_sale_order__workflow_process_id
 msgid "Automatic Workflow"
-msgstr ""
-
-#. module: sale_automatic_workflow_payment_mode
-#: model:ir.filters,name:sale_automatic_workflow_payment_mode.automatic_workflow_payment_filter
-msgid "Automatic Workflow Payment Filter"
-msgstr ""
-
-#. module: sale_automatic_workflow_payment_mode
-#: model:ir.model.fields,field_description:sale_automatic_workflow_payment_mode.field_sale_workflow_process_payment_filter_id
-msgid "Payment Filter"
-msgstr ""
-
-#. module: sale_automatic_workflow_payment_mode
-#: model:ir.model.fields,field_description:sale_automatic_workflow_payment_mode.field_sale_workflow_process_payment_filter_domain
-msgid "Payment Filter Domain"
-msgstr ""
+msgstr "自动工作流程"
 
 #. module: sale_automatic_workflow_payment_mode
 #: model:ir.model,name:sale_automatic_workflow_payment_mode.model_account_payment_mode
 msgid "Payment Modes"
-msgstr ""
-
-#. module: sale_automatic_workflow_payment_mode
-#: model:ir.model.fields,field_description:sale_automatic_workflow_payment_mode.field_sale_workflow_process_register_payment
-msgid "Register Payment"
-msgstr ""
-
-#. module: sale_automatic_workflow_payment_mode
-#: model:ir.model,name:sale_automatic_workflow_payment_mode.model_sale_workflow_process
-msgid "Sale Workflow Process"
-msgstr ""
+msgstr "付款方式"
 
 #. module: sale_automatic_workflow_payment_mode
 #: model:ir.model,name:sale_automatic_workflow_payment_mode.model_sale_order
 msgid "Sales Order"
-msgstr "销售订单"
-
-#. module: sale_automatic_workflow_payment_mode
-#: model:ir.ui.view,arch_db:sale_automatic_workflow_payment_mode.sale_workflow_process_view_form
-msgid "Set selection based on a search filter:"
 msgstr ""
 
 #. module: sale_automatic_workflow_payment_mode
 #: model:ir.model,name:sale_automatic_workflow_payment_mode.model_automatic_workflow_job
-msgid "automatic.workflow.job"
-msgstr ""
+msgid ""
+"Scheduler that will play automatically the validation of invoices, "
+"pickings..."
+msgstr "调度程序将自动验证发票，验证拣货......"
+
+#~ msgid "Automatic Workflow Payment Filter"
+#~ msgstr "自动工作流程付款筛选器"
+
+#~ msgid "Payment Filter Domain"
+#~ msgstr "付款筛选域"
+
+#~ msgid "Register Payment"
+#~ msgstr "注册付款"
+
+#~ msgid "Register Payment Invoice Filter"
+#~ msgstr "注册付款发票筛选器"
+
+#~ msgid "Sale Order"
+#~ msgstr "销售订单"
+
+#~ msgid "Sale Workflow Process"
+#~ msgstr "销售工作流程"
+
+#~ msgid "Set selection based on a search filter:"
+#~ msgstr "根据搜索筛选器设置选择："

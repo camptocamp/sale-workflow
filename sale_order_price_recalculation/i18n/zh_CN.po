@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sale-workflow (8.0)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-28 10:17+0000\n"
-"PO-Revision-Date: 2015-09-03 07:09+0000\n"
-"Last-Translator: <>\n"
+"POT-Creation-Date: 2015-09-09 12:27+0000\n"
+"PO-Revision-Date: 2019-09-01 11:23+0000\n"
+"Last-Translator: 黎伟杰 <674416404@qq.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/oca/OCA-sale-"
 "workflow-8-0/language/zh_CN/)\n"
 "Language: zh_CN\n"
@@ -17,18 +17,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.8\n"
 
 #. module: sale_order_price_recalculation
-#: view:sale.order:sale_order_price_recalculation.sorp_view_order_form
+#: model_terms:ir.ui.view,arch_db:sale_order_price_recalculation.view_order_form
 msgid "Recalculate prices"
-msgstr ""
+msgstr "重新计算价格"
 
 #. module: sale_order_price_recalculation
-#: view:sale.order:sale_order_price_recalculation.sorp_view_order_form
+#: model_terms:ir.ui.view,arch_db:sale_order_price_recalculation.view_order_form
 msgid "Reset descriptions"
-msgstr ""
+msgstr "重置说明"
 
 #. module: sale_order_price_recalculation
 #: model:ir.model,name:sale_order_price_recalculation.model_sale_order
 msgid "Sales Order"
-msgstr "销售订单"
+msgstr ""
+
+#~ msgid "Sale Order"
+#~ msgstr "销售订单"
