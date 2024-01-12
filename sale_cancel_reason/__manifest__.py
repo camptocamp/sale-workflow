@@ -11,7 +11,7 @@
     "license": "AGPL-3",
     "complexity": "normal",
     "website": "https://github.com/OCA/sale-workflow",
-    "depends": ["sale"],
+    "depends": ["sale_management"],
     "data": [
         "wizard/cancel_reason_view.xml",
         "view/sale_view.xml",
