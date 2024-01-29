@@ -18,6 +18,6 @@ class SaleOrderLine(models.Model):
     def _compute_qty_invoiced(self):
         res = super()._compute_qty_invoiced()
         for line in self:
-            if not line.product_id.billable:
+            if line.product_id and not line.product_id.billable:
                 line.qty_invoiced = line.product_uom_qty
         return res
