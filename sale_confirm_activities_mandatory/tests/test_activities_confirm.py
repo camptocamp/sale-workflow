@@ -1,19 +1,23 @@
 # Copyright 2022 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
-from odoo.addons.sale.tests import test_sale_common
+from odoo import Command
 from odoo.exceptions import AccessError, UserError
+from odoo.tests import tagged
+
+from odoo.addons.sale.tests.common import TestSaleCommon
 
 
-class TestSaleActivitiesConfirm(test_sale_common.TestCommonSaleNoChart):
+@tagged("-at_install", "post_install")
+class TestSaleActivitiesConfirm(TestSaleCommon):
     @classmethod
-    def setUpClass(cls):
-
-        super(TestSaleActivitiesConfirm, cls).setUpClass()
-
-        SaleOrder = cls.env["sale.order"].with_context(tracking_disable=True)
-
-        model_so_id = cls.env["ir.model"]._get("sale.order").id
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
+        cls.env = cls.env(
+            context=dict(cls.env.context, tracking_disable=True, no_reset_password=True)
+        )
+        SaleOrder = cls.env["sale.order"]
         ActivityType = cls.env["mail.activity.type"]
+        model_so_id = cls.env["ir.model"]._get("sale.order").id
         cls.not_validation_step = ActivityType.create(
             {"category": "default", "name": "Test1", "res_model_id": model_so_id}
         )
@@ -21,14 +25,14 @@ class TestSaleActivitiesConfirm(test_sale_common.TestCommonSaleNoChart):
             {
                 "category": "validation",
                 "name": "Test1 validation",
-                "res_model_id": model_so_id,
+                "res_model": "sale.order",
             }
         )
         cls.validation_step2 = ActivityType.create(
             {
                 "category": "validation",
                 "name": "Test2 validation",
-                "res_model_id": model_so_id,
+                "res_model": "sale.order",
                 "force_next": True,
             }
         )
@@ -36,30 +40,26 @@ class TestSaleActivitiesConfirm(test_sale_common.TestCommonSaleNoChart):
             {
                 "category": "validation",
                 "name": "Test2_1 validation",
-                "res_model_id": model_so_id,
+                "res_model": "sale.order",
                 "previous_type_ids": [(6, 0, [cls.validation_step2.id])],
             }
         )
-        # link default_type for validation_step2 activity
-        cls.validation_step2.default_next_type_id = cls.validation_step2_1.id
+        # # link default_type for validation_step2 activity
+        # cls.validation_step2.default_next_type_id = cls.validation_step2_1.id
 
         cls.sale_order = SaleOrder.create(
             {
-                "partner_id": cls.partner_customer_usd.id,
-                "partner_invoice_id": cls.partner_customer_usd.id,
-                "partner_shipping_id": cls.partner_customer_usd.id,
-                "pricelist_id": cls.pricelist_usd.id,
+                "partner_id": cls.partner.id,
+                "partner_invoice_id": cls.partner.id,
+                "partner_shipping_id": cls.partner.id,
+                "pricelist_id": cls.company_data["default_pricelist"].id,
             }
         )
 
         # create user to test validato_groups
         group_employee = cls.env.ref("base.group_user")
         Users = cls.env["res.users"].with_context(
-            {
-                "no_reset_password": True,
-                "mail_create_nosubscribe": True,
-                "mail_create_nolog": True,
-            }
+            mail_create_nosubscribe=True, mail_create_nolog=True
         )
         cls.user_not_validator = Users.create(
             {
@@ -67,12 +67,16 @@ class TestSaleActivitiesConfirm(test_sale_common.TestCommonSaleNoChart):
                 "login": "tyrion",
                 "email": "tyrion@example.com",
                 "notification_type": "email",
-                "groups_id": [(6, 0, [group_employee.id])],
+                "groups_id": [Command.set(group_employee.ids)],
             }
         )
         account_values = {
-            "property_account_payable_id": cls.account_payable.id,
-            "property_account_receivable_id": cls.account_receivable.id,
+            "property_account_payable_id": cls.company_data[
+                "default_account_payable"
+            ].id,
+            "property_account_receivable_id": cls.company_data[
+                "default_account_receivable"
+            ].id,
         }
         cls.user_not_validator.partner_id.write(account_values)
         cls.group_salemanager = cls.env.ref("sales_team.group_sale_manager")
@@ -82,7 +86,9 @@ class TestSaleActivitiesConfirm(test_sale_common.TestCommonSaleNoChart):
                 "login": "tyrionM",
                 "email": "tyrionM@example.com",
                 "notification_type": "email",
-                "groups_id": [(6, 0, [group_employee.id, cls.group_salemanager.id])],
+                "groups_id": [
+                    Command.set((group_employee + cls.group_salemanager).ids)
+                ],
             }
         )
         cls.user_validator.partner_id.write(account_values)
