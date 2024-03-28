@@ -12,6 +12,9 @@ class SaleOrder(models.Model):
             if not rec.company_id.carrier_auto_assign:
                 continue
             rec._add_delivery_carrier_on_confirmation()
+        if not self.env.user.company_id.carrier_auto_assign:
+            return super().action_confirm()
+        self._add_delivery_carrier_on_confirmation()
         return super().action_confirm()
 
     def _add_delivery_carrier_on_confirmation(self):
