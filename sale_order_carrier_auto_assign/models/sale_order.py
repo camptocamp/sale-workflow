@@ -1,4 +1,5 @@
 # Copyright 2020 Camptocamp SA
+# Copyright 2024 Jacques-Etienne Baudoux (BCIM) <je@bcim.be>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 from odoo import models
 
@@ -9,7 +10,7 @@ class SaleOrder(models.Model):
 
     def action_confirm(self):
         for rec in self:
-            if not rec.company_id.carrier_auto_assign:
+            if not rec.company_id.carrier_auto_assign or rec.is_all_service:
                 continue
             rec._add_delivery_carrier_on_confirmation()
         return super().action_confirm()
