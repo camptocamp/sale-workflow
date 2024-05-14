@@ -10,6 +10,5 @@ class SaleOrder(models.Model):
         # Filter lines with non billable products or that are sections or notes
         invoiceable_lines = super()._get_invoiceable_lines(final=final)
         return invoiceable_lines.filtered(
-            lambda line: line.product_id.billable
-            or line.display_type in ["line_section", "line_note"]
+            lambda line: not line.product_id or line.product_id.billable
         )
