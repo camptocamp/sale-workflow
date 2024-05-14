@@ -7,6 +7,9 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
 
     def _get_invoiceable_lines(self, final=False):
-        """Filter lines with non billable products."""
+        # Filter lines with non billable products or that are sections or notes
         invoiceable_lines = super()._get_invoiceable_lines(final=final)
-        return invoiceable_lines.filtered(lambda line: line.product_id.billable)
+        return invoiceable_lines.filtered(
+            lambda line: line.product_id.billable
+            or line.display_type in ["line_section", "line_note"]
+        )
