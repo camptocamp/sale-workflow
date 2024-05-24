@@ -11,6 +11,10 @@ from odoo.exceptions import ValidationError
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
+    discount = fields.Float(
+        string="Total discount",
+        readonly=True,
+    )
     discount1 = fields.Float(
         string="Disc. 1 (%)",
         digits="Discount",
