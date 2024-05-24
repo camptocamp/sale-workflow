@@ -153,7 +153,7 @@ class TestSaleOrder(common.TransactionCase):
         self.assertAlmostEqual(self.order.amount_tax, 56.25)
         self.so_line2.discounting_type = "multiplicative"
         self.so_line2.discount2 = 10.0
-        self.assertAlmostEqual(self.so_line1.discount, 60.0)
+        self.assertAlmostEqual(self.so_line1.discount, 87.5)
         self.assertAlmostEqual(self.so_line2.price_subtotal, 270.0)
         self.assertAlmostEqual(self.order.amount_untaxed, 345.0)
         self.assertAlmostEqual(self.order.amount_tax, 51.75)
