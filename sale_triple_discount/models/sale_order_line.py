@@ -6,6 +6,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.tools import float_is_zero
 
 
 class SaleOrderLine(models.Model):
@@ -13,12 +14,21 @@ class SaleOrderLine(models.Model):
 
     discount = fields.Float(
         string="Total discount",
+        store=True,
+        compute="_compute_discount_consolidated",
+        compute_sudo=True,
+        precompute=True,
         readonly=True,
     )
     discount1 = fields.Float(
         string="Disc. 1 (%)",
         digits="Discount",
+        store=True,
         default=0.0,
+        compute="_compute_discount",
+        compute_sudo=True,
+        precompute=True,
+        readonly=False,
     )
     discount2 = fields.Float(
         string="Disc. 2 (%)",
@@ -75,18 +85,10 @@ class SaleOrderLine(models.Model):
     def _discount_fields(self):
         return ["discount1", "discount2", "discount3"]
 
-    # pylint: disable=W8110
     @api.depends("discount1", "discount2", "discount3", "discounting_type")
-    def _compute_discount(self):
-        super()._compute_discount()
+    def _compute_discount_consolidated(self):
         for line in self:
-            # Reset discount if not done in super
-            if not (
-                line.order_id.pricelist_id
-                and line.order_id.pricelist_id.discount_policy == "without_discount"
-            ):
-                line.discount = 0.0
-            line.discount += line._get_final_discount()
+            line.discount = line._get_final_discount()
 
     _sql_constraints = [
         (
