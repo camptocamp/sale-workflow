@@ -77,27 +77,6 @@ Unit price: 600.00 ->
 Module allows defining additional discount fields and applying them with
 other by adding them to the `_discount_fields` method.
 
-Known issues / Roadmap
-======================
-
-The three discount values are now consolidated into the standard discount field.
-
-The issue with actual implementation is that discount is already
-a computed field in std Odoo (eg to apply discount from pricelist).
-
-Therefore, the value computed by Odoo must be stored in another field,
-(ie discount1) for discount to be used to consolidate the multiple
-discount.
-That means discount1 must be computed by the same function that computes
-discount, but it cannot be part of the api.depends from the compute
-function as the field value cannot depend on itself.
-
-A compromise is to override the write function to expicitely call
-_compute_discount in case discount1 is being modified. The drawback
-is that defining the field on the UI will not trigger the computation
-of discount until the record is saved which will therefore provide
-wrong total values while the record is being edited.
-
 Bug Tracker
 ===========
 
