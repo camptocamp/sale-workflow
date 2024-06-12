@@ -4,8 +4,6 @@ from collections import OrderedDict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.osv.expression import AND
-from odoo.tools.safe_eval import safe_eval
 
 
 class SaleOrder(models.Model):
@@ -24,7 +22,7 @@ class SaleOrder(models.Model):
         for order in self:
             copy_sections = order.split_strategy_id.copy_sections
             copy_notes = order.split_strategy_id.copy_notes
-            lines_to_split = order._select_lines_to_split()
+            lines_to_split = order.split_strategy_id._select_lines_to_split(order)
             if not lines_to_split:
                 raise UserError(
                     _(
@@ -99,11 +97,3 @@ class SaleOrder(models.Model):
         """Hook to customize values used on new sale order line from split"""
         self.ensure_one()
         return {"order_id": self.id}
-
-    def _select_lines_to_split(self):
-        self.ensure_one()
-        line_filter = self.split_strategy_id.line_filter_id
-        domain = safe_eval(line_filter.domain)
-        return self.env["sale.order.line"].search(
-            AND([domain, [("order_id", "=", self.id)]])
-        )
