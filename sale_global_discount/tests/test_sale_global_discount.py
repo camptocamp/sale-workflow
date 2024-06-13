@@ -298,4 +298,3 @@ class TestSaleGlobalDiscount(AccountTestInvoicingCommon):
         self.assertAlmostEqual(
             self.get_taxes_widget_total_tax(test_sale), test_sale.amount_tax
         )
-
