@@ -2,9 +2,8 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import exceptions
-from odoo.tests import Form, tagged
-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.tests import Form, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -298,4 +297,3 @@ class TestSaleGlobalDiscount(AccountTestInvoicingCommon):
         self.assertAlmostEqual(
             self.get_taxes_widget_total_tax(test_sale), test_sale.amount_tax
         )
-

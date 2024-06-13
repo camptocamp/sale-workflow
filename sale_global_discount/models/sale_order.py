@@ -139,7 +139,6 @@ class SaleOrder(models.Model):
                         ),
                     }
                 )
-            order.update(vals)
         return res
 
     def _compute_tax_totals(self):
