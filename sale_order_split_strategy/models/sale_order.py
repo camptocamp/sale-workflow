@@ -1,8 +1,8 @@
 # Copyright 2024 Camptocamp SA
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
-from collections import OrderedDict
+from collections import defaultdict
 
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 
@@ -15,19 +15,29 @@ class SaleOrder(models.Model):
         orders_without_split = self.filtered(lambda o: not o.split_strategy_id)
         if not silent_errors and orders_without_split:
             raise UserError(
-                _("Cannot split orders %s without any split strategy defined")
-                % ", ".join(orders_without_split.mapped("name"))
+                _(
+                    "Cannot split orders %(order_names)s without any split strategy defined",
+                    order_names=", ".join(orders_without_split.mapped("name")),
+                )
             )
         new_order_ids = []
         for order in self:
             lines_to_split = order.split_strategy_id._select_lines_to_split(order)
             if order._has_only_lines_to_split(lines_to_split):
-                order.message_post(body="This sale order was not split using strategy %s as there would not be any lines left on this order.")
+                order.message_post(
+                    body=_(
+                        "This sale order was not split using strategy %(strategy)s"
+                        " because there would not be any lines left on this order.",
+                        strategy=order.split_strategy_id.name,
+                    )
+                )
                 continue
             if not lines_to_split:
                 msg = _(
-                    "Cannot split order %s according to its strategy because there are no matching lines"
-                ) % order.name
+                    "Cannot split order %(order_name)s according to its strategy"
+                    " because there are no matching lines",
+                    order_name=order.name,
+                )
                 if not silent_errors:
                     raise UserError(msg)
                 else:
@@ -72,17 +82,14 @@ class SaleOrder(models.Model):
         return True
 
     def _get_lines_grouped_by_sections(self):
-        # Prepare an OrderedDict from sale order lines and their sections
+        # Prepare a dict from sale order lines and their sections
         self.ensure_one()
-        sections_dict = OrderedDict()
-        section_line_ids = None
+        sections_dict = defaultdict(list)
+        section_id = None
         for line in self.order_line.sorted():
             if line.display_type == "line_section":
-                section_line_ids = sections_dict.setdefault(line.id, [])
-            else:
-                if section_line_ids is None:
-                    section_line_ids = sections_dict.setdefault(False, [])
-                section_line_ids.append(line.id)
+                section_id = line.id
+            sections_dict[section_id].append(line.id)
         return sections_dict
 
     def _prepare_message_split_from(self, order):
@@ -92,8 +99,11 @@ class SaleOrder(models.Model):
         )
         if not template:
             return _(
-                "This sale order was created after splitting lines from %s using strategy %s"
-            ) % (order.name, order.split_strategy_id.name)
+                "This sale order was created after splitting lines from %(order_name)s"
+                " using strategy %(strategy)s",
+                order_name=order.name,
+                strategy=order.split_strategy_id.name,
+            )
         else:
             return template._render(values={"from_order": order})
 
@@ -104,8 +114,11 @@ class SaleOrder(models.Model):
         )
         if not template:
             return _(
-                "This sale order had some of its lines split to %s using strategy %s"
-            ) % (order.name, self.split_strategy_id.name)
+                "This sale order had some of its lines split to %(order_name)s"
+                " using strategy %(strategy)s",
+                order_name=order.name,
+                strategy=self.split_strategy_id.name,
+            )
         else:
             return template._render(values={"from_order": self, "to_order": order})
 

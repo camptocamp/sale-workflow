@@ -35,8 +35,13 @@ class TestSplitStrategy(SavepointCase):
         #         "model_id": "sale.order.line",
         #     }
         # )
-        cls.product_type_not_service_strategy = cls.env["sale.order.split.strategy"].create(
-            {"name": "Product type", "line_filter_id": cls.product_type_not_service_filter.id}
+        cls.product_type_not_service_strategy = cls.env[
+            "sale.order.split.strategy"
+        ].create(
+            {
+                "name": "Product type",
+                "line_filter_id": cls.product_type_not_service_filter.id,
+            }
         )
 
     @classmethod
@@ -49,12 +54,9 @@ class TestSplitStrategy(SavepointCase):
             cls.product_service_1,
             cls.product_service_2,
         ]:
-            try:
-                with order_form.order_line.new() as line_form:
-                    line_form.product_id = product
-                    line_form.product_uom_qty = 1
-            except AssertionError as err:
-                breakpoint()
+            with order_form.order_line.new() as line_form:
+                line_form.product_id = product
+                line_form.product_uom_qty = 1
         return order_form.save()
 
     def test_split_product_type(self):
