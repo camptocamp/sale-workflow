@@ -54,7 +54,6 @@ class SaleOrder(models.Model):
         return self.browse(new_order_ids)
 
     def _has_only_lines_to_split(self, lines_to_split):
-        # TODO: Exclude is_delivery lines in a glue module with delivery?
         return self.order_line == lines_to_split
 
     def _split_lines(self, sections_dict, lines_to_split, target_order):
