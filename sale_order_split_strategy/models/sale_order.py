@@ -24,25 +24,11 @@ class SaleOrder(models.Model):
         for order in self:
             lines_to_split = order.split_strategy_id._select_lines_to_split(order)
             if order._has_only_lines_to_split(lines_to_split):
-                order.message_post(
-                    body=_(
-                        "This sale order was not split using strategy %(strategy)s"
-                        " because there would not be any lines left on this order.",
-                        strategy=order.split_strategy_id.name,
-                    )
-                )
+                order._handle_only_lines_to_split()
                 continue
             if not lines_to_split:
-                msg = _(
-                    "Cannot split order %(order_name)s according to its strategy"
-                    " because there are no matching lines",
-                    order_name=order.name,
-                )
-                if not silent_errors:
-                    raise UserError(msg)
-                else:
-                    order.message_post(body=msg)
-                    continue
+                order._handle_no_lines_to_split(silent_errors=silent_errors)
+                continue
             new_order = order.copy(order._prepare_order_copy_defaults())
             sections_dict = order._get_lines_grouped_by_sections()
             order._split_lines(sections_dict, lines_to_split, new_order)
@@ -53,7 +39,30 @@ class SaleOrder(models.Model):
             new_order._postprocess_split_to(order)
         return self.browse(new_order_ids)
 
+    def _handle_no_lines_to_split(self, silent_errors=False):
+        self.ensure_one()
+        msg = _(
+            "Cannot split order %(order_name)s according to its strategy"
+            " because there are no matching lines",
+            order_name=self.name,
+        )
+        if not silent_errors:
+            raise UserError(msg)
+        else:
+            self.message_post(body=msg)
+
+    def _handle_only_lines_to_split(self):
+        self.ensure_one()
+        self.message_post(
+            body=_(
+                "This sale order was not split using strategy %(strategy)s"
+                " because there would not be any lines left on this order.",
+                strategy=self.split_strategy_id.name,
+            )
+        )
+
     def _has_only_lines_to_split(self, lines_to_split):
+        self.ensure_one()
         return self.order_line == lines_to_split
 
     def _split_lines(self, sections_dict, lines_to_split, target_order):
