@@ -84,6 +84,29 @@ class SaleOrderLine(models.Model):
     def _discount_fields(self):
         return ["discount1", "discount2", "discount3"]
 
+    # Copy of Odoo function to change field being assigned from discount to discount1
+    @api.depends('product_id', 'product_uom', 'product_uom_qty')
+    def _compute_discount(self):
+        for line in self:
+            if not line.product_id or line.display_type:
+                line.discount1 = 0.0
+
+            if not (
+                line.order_id.pricelist_id
+                and line.order_id.pricelist_id.discount_policy == 'without_discount'
+            ):
+                continue
+
+            line.discount1 = 0.0
+
+            if not line.pricelist_item_id:
+                # No pricelist rule was found for the product
+                # therefore, the pricelist didn't apply any discount/change
+                # to the existing sales price.
+                continue
+
+            line.discount1 = self._calc_discount_from_pricelist()
+
     @api.depends("discount1", "discount2", "discount3", "discounting_type")
     def _compute_discount_consolidated(self):
         for line in self:
