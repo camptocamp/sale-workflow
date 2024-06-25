@@ -5,7 +5,6 @@ from odoo import api, models
 
 
 class SaleOrderLine(models.Model):
-
     _inherit = "sale.order.line"
 
     @api.depends(
@@ -13,9 +12,7 @@ class SaleOrderLine(models.Model):
     )
     def _compute_price_unit(self):
         for line in self:
-            date = self.env.context.get(
-                "force_pricelist_date", line.order_id.commitment_date
-            )
+            date = line.order_id._get_pricelist_date()
             line = line.with_context(force_pricelist_date=date)
             super(SaleOrderLine, line)._compute_price_unit()
         return True
@@ -25,9 +22,7 @@ class SaleOrderLine(models.Model):
     )
     def _compute_pricelist_item_id(self):
         for line in self:
-            date = self.env.context.get(
-                "force_pricelist_date", line.order_id.commitment_date
-            )
+            date = line.order_id._get_pricelist_date()
             line = line.with_context(force_pricelist_date=date)
             super(SaleOrderLine, line)._compute_pricelist_item_id()
         return True
