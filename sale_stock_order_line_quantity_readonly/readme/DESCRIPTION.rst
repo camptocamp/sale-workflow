@@ -1,0 +1,2 @@
+-This module extends the functionality of the Sales module to restrict users from updating the quantity of products in sale order lines.
+- Once a sale order line is completed or in the process of being picked, it prevents accidental changes.
