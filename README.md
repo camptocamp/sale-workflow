@@ -33,16 +33,17 @@ addon | version | maintainers | summary
 [sale_automatic_workflow_job](sale_automatic_workflow_job/) | 16.0.1.0.0 |  | Execute sale automatic workflows in queue jobs
 [sale_automatic_workflow_payment_mode](sale_automatic_workflow_payment_mode/) | 16.0.1.0.0 |  | Sale Automatic Workflow - Payment Mode
 [sale_blanket_order](sale_blanket_order/) | 16.0.1.0.0 |  | Blanket Orders
+[sale_block_no_stock](sale_block_no_stock/) | 16.0.1.0.1 | [![Shide](https://github.com/Shide.png?size=30px)](https://github.com/Shide) | Block Sales if products has not enough Quantity based on a chosen field
 [sale_cancel_reason](sale_cancel_reason/) | 16.0.1.0.1 |  | Sale Cancel Reason
 [sale_commercial_partner](sale_commercial_partner/) | 16.0.1.0.1 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Add stored related field 'Commercial Entity' on sale orders
 [sale_company_currency](sale_company_currency/) | 16.0.1.0.0 |  | Company Currency in Sale Orders
 [sale_delivery_split_date](sale_delivery_split_date/) | 16.0.1.0.0 |  | Sale Deliveries split by date
 [sale_delivery_state](sale_delivery_state/) | 16.0.1.0.1 |  | Show the delivery state on the sale order
 [sale_discount_display_amount](sale_discount_display_amount/) | 16.0.1.1.0 |  | This addon intends to display the amount of the discount computed on sale_order_line and sale_order level
-[sale_elaboration](sale_elaboration/) | 16.0.1.5.3 | [![rafaelbn](https://github.com/rafaelbn.png?size=30px)](https://github.com/rafaelbn) [![yajo](https://github.com/yajo.png?size=30px)](https://github.com/yajo) | Set an elaboration for any sale line
+[sale_elaboration](sale_elaboration/) | 16.0.1.7.0 | [![CarlosRoca13](https://github.com/CarlosRoca13.png?size=30px)](https://github.com/CarlosRoca13) [![rafaelbn](https://github.com/rafaelbn.png?size=30px)](https://github.com/rafaelbn) [![sergio-teruel](https://github.com/sergio-teruel.png?size=30px)](https://github.com/sergio-teruel) [![yajo](https://github.com/yajo.png?size=30px)](https://github.com/yajo) | Set an elaboration for any sale line
 [sale_exception](sale_exception/) | 16.0.1.3.0 |  | Custom exceptions on sale order
 [sale_exception_holidays_public](sale_exception_holidays_public/) | 16.0.1.0.1 | [![jbaudoux](https://github.com/jbaudoux.png?size=30px)](https://github.com/jbaudoux) | Raise a sale exception if there is a commitment_date on the SO and this date is a public holidays for the shipping partner address
-[sale_fixed_discount](sale_fixed_discount/) | 16.0.1.0.2 |  | Allows to apply fixed amount discounts in sales orders.
+[sale_fixed_discount](sale_fixed_discount/) | 16.0.1.0.3 |  | Allows to apply fixed amount discounts in sales orders.
 [sale_force_invoiced](sale_force_invoiced/) | 16.0.2.1.1 |  | Allows to force the invoice status of the sales order to Invoiced
 [sale_invoice_frequency](sale_invoice_frequency/) | 16.0.1.2.1 | [![Shide](https://github.com/Shide.png?size=30px)](https://github.com/Shide) [![yajo](https://github.com/yajo.png?size=30px)](https://github.com/yajo) [![EmilioPascual](https://github.com/EmilioPascual.png?size=30px)](https://github.com/EmilioPascual) | Define the invoice frequency for customers
 [sale_invoice_policy](sale_invoice_policy/) | 16.0.2.0.0 |  | Sales Management: let the user choose the invoice policy on the order
@@ -53,7 +54,7 @@ addon | version | maintainers | summary
 [sale_numeric_step](sale_numeric_step/) | 16.0.1.0.1 | [![rafaelbn](https://github.com/rafaelbn.png?size=30px)](https://github.com/rafaelbn) [![yajo](https://github.com/yajo.png?size=30px)](https://github.com/yajo) | Improve mobile/tablet sale process by adding numeric step widgets
 [sale_order_amount_to_invoice](sale_order_amount_to_invoice/) | 16.0.1.0.0 |  | Show total amount to invoice in quotations/sales orders
 [sale_order_archive](sale_order_archive/) | 16.0.1.0.0 |  | Archive Sale Orders
-[sale_order_carrier_auto_assign](sale_order_carrier_auto_assign/) | 16.0.1.1.0 |  | Auto assign delivery carrier on sale order confirmation
+[sale_order_carrier_auto_assign](sale_order_carrier_auto_assign/) | 16.0.1.2.0 | [![jbaudoux](https://github.com/jbaudoux.png?size=30px)](https://github.com/jbaudoux) | Auto assign delivery carrier on sale order confirmation
 [sale_order_currency_rate](sale_order_currency_rate/) | 16.0.1.0.0 |  | Currency Rate in Sale Order
 [sale_order_general_discount](sale_order_general_discount/) | 16.0.1.1.0 |  | General discount per sale order
 [sale_order_general_discount_triple](sale_order_general_discount_triple/) | 16.0.2.0.1 | [![ashishhirapara](https://github.com/ashishhirapara.png?size=30px)](https://github.com/ashishhirapara) | General discount per sale order with triple
@@ -62,6 +63,7 @@ addon | version | maintainers | summary
 [sale_order_invoicing_picking_filter](sale_order_invoicing_picking_filter/) | 16.0.1.0.0 |  | Create invoices from sale orders based on the products in pickings.
 [sale_order_line_date](sale_order_line_date/) | 16.0.1.1.0 |  | Adds a commitment date to each sale order line.
 [sale_order_line_delivery_state](sale_order_line_delivery_state/) | 16.0.1.0.0 |  | Show the delivery state on the sale order line
+[sale_order_line_effective_date](sale_order_line_effective_date/) | 16.0.1.0.1 | [![EmilioPascual](https://github.com/EmilioPascual.png?size=30px)](https://github.com/EmilioPascual) [![rafaelbn](https://github.com/rafaelbn.png?size=30px)](https://github.com/rafaelbn) [![Shide](https://github.com/Shide.png?size=30px)](https://github.com/Shide) | Calculated effective dates in Sale Order Lines
 [sale_order_line_field_from_product_attribute](sale_order_line_field_from_product_attribute/) | 16.0.1.0.0 |  | Store Attribute value sis Sales Order line fields
 [sale_order_line_input](sale_order_line_input/) | 16.0.1.0.0 |  | Search, create or modify directly sale order lines
 [sale_order_line_menu](sale_order_line_menu/) | 16.0.1.3.1 |  | Adds a Sale Order Lines Menu
@@ -79,7 +81,7 @@ addon | version | maintainers | summary
 [sale_order_product_recommendation_quick_add](sale_order_product_recommendation_quick_add/) | 16.0.1.0.0 |  | Add recommended products to sale order in a single click
 [sale_order_qty_change_no_recompute](sale_order_qty_change_no_recompute/) | 16.0.1.0.1 | [![victoralmau](https://github.com/victoralmau.png?size=30px)](https://github.com/victoralmau) | Prevent recompute if only quantity has changed in sale order line
 [sale_order_report_without_price](sale_order_report_without_price/) | 16.0.1.0.0 |  | Allow you to generate quotation and order reports without price.
-[sale_order_revision](sale_order_revision/) | 16.0.1.0.1 |  | Keep track of revised quotations
+[sale_order_revision](sale_order_revision/) | 16.0.1.0.2 |  | Keep track of revised quotations
 [sale_order_type](sale_order_type/) | 16.0.1.1.0 |  | Sale Order Type
 [sale_order_warn_message](sale_order_warn_message/) | 16.0.1.0.0 |  | Add a popup warning on sale to ensure warning is populated
 [sale_packaging_default](sale_packaging_default/) | 16.0.2.2.0 | [![yajo](https://github.com/yajo.png?size=30px)](https://github.com/yajo) | Simplify using products default packaging for sales
