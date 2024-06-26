@@ -1,3 +1,4 @@
+=======
 ====================
 Sale Global Discount
 ====================
@@ -73,39 +74,3 @@ If you spotted it first, help us to smash it by providing a detailed and welcome
 Do not contact contributors directly about support or help with technical issues.
 
 Credits
-=======
-
-Authors
-~~~~~~~
-
-* Tecnativa
-
-Contributors
-~~~~~~~~~~~~
-
-* `Tecnativa <https://www.tecnativa.com>`_
-
-  * David Vidal
-  * Pedro M. Baeza
-* Omar Castiñeira <omar@comunitea.com>
-* `Trobz <https://www.trobz.com>`_
-
-  * Quoc Duong
-  * Tris Doan
-
-Maintainers
-~~~~~~~~~~~
-
-This module is maintained by the OCA.
-
-.. image:: https://odoo-community.org/logo.png
-   :alt: Odoo Community Association
-   :target: https://odoo-community.org
-
-OCA, or the Odoo Community Association, is a nonprofit organization whose
-mission is to support the collaborative development of Odoo features and
-promote its widespread use.
-
-This module is part of the `OCA/sale-workflow <https://github.com/OCA/sale-workflow/tree/16.0/sale_global_discount>`_ project on GitHub.
-
-You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.
