@@ -200,3 +200,24 @@ class TestProductSet(common.SavepointCase):
         wizard.add_set()
         self.assertEqual(products, self.so.order_line.product_id)
         self.assertEqual(len(self.so.order_line), 3)
+
+    def test_product_set_toggle_active(self):
+        partner = self.env.ref("base.res_partner_2")
+        self.product_set.partner_id = partner
+
+        # partner active, product set active
+        self.assertTrue(self.product_set.active)
+        self.assertTrue(partner.active)
+
+        # partner archived, product set archived
+        partner.write({"active": False})
+        self.assertFalse(self.product_set.active)
+        self.assertFalse(partner.active)
+
+        # partner unarchived, product set unarchived
+        partner.write({"active": True})
+        self.assertTrue(self.product_set.active)
+
+        # product set archived, partner not archived
+        self.product_set.write({"active": False})
+        self.assertTrue(partner.active)
