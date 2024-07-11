@@ -105,7 +105,20 @@ class SaleOrderLine(models.Model):
                 # to the existing sales price.
                 continue
 
-            line.discount1 = self._calc_discount_from_pricelist()
+            line.discount1 = line._calc_discount_from_pricelist()
+        
+    def _calc_discount_from_pricelist(self):
+        self.ensure_one()
+        line = self.with_company(self.company_id)
+        pricelist_price = self._get_pricelist_price()
+        base_price = self._get_pricelist_price_before_discount()
+
+        if base_price != 0:  # Avoid division by zero
+            discount = (base_price - pricelist_price) / base_price * 100
+            if (discount > 0 and base_price > 0) or (discount < 0 and base_price < 0):
+                # only show negative discounts if price is negative
+                # otherwise it's a surcharge which shouldn't be shown to the customer
+                self.discount = discount
 
     @api.depends("discount1", "discount2", "discount3", "discounting_type")
     def _compute_discount_consolidated(self):
