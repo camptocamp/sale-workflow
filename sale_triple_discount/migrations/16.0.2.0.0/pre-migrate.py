@@ -1,6 +1,6 @@
 # Copyright 2024 Camptocamp SA
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
-import openupgrade
+from openupgradelib import openupgrade
 
 
 def migrate_discount_to_discount1():
