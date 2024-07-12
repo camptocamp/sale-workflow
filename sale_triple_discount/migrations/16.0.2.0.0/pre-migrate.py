@@ -3,8 +3,9 @@
 from openupgradelib import openupgrade
 
 
-def migrate_discount_to_discount1():
+def migrate_discount_to_discount1(env):
     openupgrade.add_fields(
+        env,
         [
             (
                 "discount1",
@@ -25,5 +26,6 @@ def migrate_discount_to_discount1():
     )
 
 
-def migrate(cr, version):
-    migrate_discount_to_discount1()
+@openupgrade.migrate()
+def migrate(env, version):
+    migrate_discount_to_discount1(env)
