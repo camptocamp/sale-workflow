@@ -19,6 +19,7 @@ def migrate_discount_to_discount1(env):
         ]
     )
     openupgrade.logged_query(
+        env.cr,
         """
         UPDATE sale_order_line
         SET discount1 = discount;
