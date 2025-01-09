@@ -7,12 +7,10 @@ from unittest import mock
 from freezegun import freeze_time
 
 from odoo import fields
-from odoo.tests import tagged
 
 from .common import TestAutomaticWorkflowMixin, TestCommon
 
 
-@tagged("post_install", "-at_install")
 class TestAutomaticWorkflow(TestCommon, TestAutomaticWorkflowMixin):
     def setUp(self):
         super().setUp()
