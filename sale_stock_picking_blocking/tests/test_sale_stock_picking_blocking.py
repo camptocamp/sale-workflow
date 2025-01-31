@@ -29,13 +29,15 @@ class TestSaleDeliveryBlock(TransactionCase):
         prod_dict = {
             "name": "test product",
             "type": "consu",
-            "categ_id": cls.env.ref('product.product_category_all').id,
+            "categ_id": cls.env.ref("product.product_category_all").id,
             "list_price": 100.0,
             "standard_price": 60.0,
-            "uom_id": cls.env.ref('uom.product_uom_unit').id,
-            "uom_po_id": cls.env.ref('uom.product_uom_unit').id,
+            "uom_id": cls.env.ref("uom.product_uom_unit").id,
+            "uom_po_id": cls.env.ref("uom.product_uom_unit").id,
         }
-        cls.product = cls.env["product.product"].with_user(cls.user_test).create(prod_dict)
+        cls.product = (
+            cls.env["product.product"].with_user(cls.user_test).create(prod_dict)
+        )
         # Create Sale order:
         so_dict = {
             "partner_id": cls.env.ref("base.res_partner_1").id,
@@ -129,5 +131,3 @@ class TestSaleDeliveryBlock(TransactionCase):
         so = so_form.save()
         self.assertEqual(so.delivery_block_id, block_reason)
         self.assertEqual(so.copy().delivery_block_id, block_reason)
-        print(self.env.context)
-

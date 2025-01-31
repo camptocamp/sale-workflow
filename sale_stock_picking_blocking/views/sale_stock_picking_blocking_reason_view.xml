@@ -4,8 +4,8 @@
 <!--License
 AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).-->
 <odoo>
-    <record id="sale_stock_picking_blocking_reason_list_view" model="ir.ui.view">
-        <field name="name">sale.delivery.block.reason.list</field>
+    <record id="sale_stock_picking_blocking_reason_tree_view" model="ir.ui.view">
+        <field name="name">sale.delivery.block.reason.view_list</field>
         <field name="model">sale.delivery.block.reason</field>
         <field name="arch" type="xml">
             <list>

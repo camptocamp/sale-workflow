@@ -24,7 +24,7 @@ class SaleOrder(models.Model):
             raise ValidationError(
                 _('You cannot block a sale order with "auto_done_setting" active.')
             )
-                        
+
     @api.depends("partner_id", "payment_term_id")
     def _compute_delivery_block_id(self):
         """Add the 'Default Delivery Block Reason' if set in the partner
