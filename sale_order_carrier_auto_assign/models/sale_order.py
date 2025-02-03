@@ -27,5 +27,5 @@ class SaleOrder(models.Model):
                 .with_context(**delivery_wiz_context)
                 .create({})
             )
-            delivery_wiz._get_shipment_rate()
+            delivery_wiz._get_delivery_rate()
             delivery_wiz.button_confirm()
