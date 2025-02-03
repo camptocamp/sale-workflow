@@ -7,10 +7,9 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
 
     def action_confirm(self):
-        for rec in self:
-            if not rec.company_id.carrier_auto_assign:
-                continue
-            rec._add_delivery_carrier_on_confirmation()
+        self.filtered(
+            lambda so: so.company_id.carrier_auto_assign
+        )._add_delivery_carrier_on_confirmation()
         return super().action_confirm()
 
     def _add_delivery_carrier_on_confirmation(self):
