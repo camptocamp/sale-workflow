@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 from collections import defaultdict
 
-from odoo import _, fields, models
+from odoo import fields, models
 from odoo.exceptions import UserError
 
 
@@ -15,7 +15,7 @@ class SaleOrder(models.Model):
         orders_without_split = self.filtered(lambda o: not o.split_strategy_id)
         if not silent_errors and orders_without_split:
             raise UserError(
-                _(
+                self.env._(
                     "Cannot split orders %(order_names)s without any split strategy defined",
                     order_names=", ".join(orders_without_split.mapped("name")),
                 )
@@ -41,7 +41,7 @@ class SaleOrder(models.Model):
 
     def _handle_no_lines_to_split(self, silent_errors=False):
         self.ensure_one()
-        msg = _(
+        msg = self.env._(
             "Cannot split order %(order_name)s according to its strategy"
             " because there are no matching lines",
             order_name=self.name,
@@ -54,7 +54,7 @@ class SaleOrder(models.Model):
     def _handle_only_lines_to_split(self):
         self.ensure_one()
         self.message_post(
-            body=_(
+            body=self.env._(
                 "This sale order was not split using strategy %(strategy)s"
                 " because there would not be any lines left on this order.",
                 strategy=self.split_strategy_id.name,
