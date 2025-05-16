@@ -39,7 +39,7 @@ class SaleOrderLine(models.Model):
         #   1) commitment_date is set, compute date_planned from date_deadline
         #   2) commitment_date isn't set, compute date_planned and date_deadline
         res = super()._prepare_procurement_values(group_id=group_id)
-        if self.order_id.commitment_date:
+        if self.commitment_date or self.order_id.commitment_date:
             res = self._prepare_procurement_values_commitment_date(res)
         else:
             res = self._prepare_procurement_values_no_commitment_date(res)
