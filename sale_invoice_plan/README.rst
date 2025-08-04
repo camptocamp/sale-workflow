@@ -104,6 +104,10 @@ Contributors
 
       -  Son Ho <sonhd@trobz.com>
 
+-  `Solvos <https://solvos.es>`__:
+
+      -  Christian Santamaría <christian.santamaria@solvos.es>
+
 Maintainers
 -----------
 
