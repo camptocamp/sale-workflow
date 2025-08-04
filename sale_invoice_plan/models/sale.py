@@ -31,6 +31,11 @@ class SaleOrder(models.Model):
     invoice_plan_total_amount = fields.Monetary(
         compute="_compute_invoice_plan_total",
     )
+    invoice_plan_pending = fields.Integer(
+        compute="_compute_invoice_plan_pending",
+        string="Pending plans",
+        store=True,
+    )
 
     @api.depends("invoice_plan_ids")
     def _compute_invoice_plan_total(self):
@@ -50,6 +55,18 @@ class SaleOrder(models.Model):
             rec.invoice_plan_process = (
                 rec.state == "sale" and has_invoice_plan and to_invoice and inv_or_adv
             )
+
+    @api.depends("invoice_plan_ids.invoiced")
+    def _compute_invoice_plan_pending(self):
+        pending = dict(
+            self.env["sale.invoice.plan"]._read_group(
+                [("sale_id", "in", self.ids), ("invoiced", "=", False)],
+                ["sale_id"],
+                ["__count"],
+            )
+        )
+        for order in self:
+            order.invoice_plan_pending = pending.get(order, 0)
 
     @api.constrains("invoice_plan_ids")
     def _check_invoice_plan_total_percent(self):
