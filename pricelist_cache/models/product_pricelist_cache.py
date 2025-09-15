@@ -143,13 +143,11 @@ class PricelistCache(models.Model):
             # have to be updated
             if pricelist._is_factor_pricelist():
                 product_ids_to_update = product_ids
-            # Otherwise, prices are fetched from parent pricelist
-            # and only products in items have to be updated
             else:
-                product_item_ids = pricelist.item_ids.filtered(
-                    lambda i: i.product_id.id in product_ids
-                )
-                product_ids_to_update = product_item_ids.mapped("product_id").ids
+                pricelist_product_ids = (pricelist.item_ids.product_id | pricelist.item_ids.product_tmpl_id.product_variant_ids | pricelist.item_ids.categ_id.product_ids).ids
+                for product_id in product_ids:
+                    if product_id in pricelist_product_ids:
+                        product_ids_to_update.append(product_id)
         else:
             # No parent (for instance public pricelist), then update everything
             product_ids_to_update = product_ids
