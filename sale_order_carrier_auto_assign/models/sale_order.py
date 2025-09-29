@@ -29,10 +29,21 @@ class SaleOrder(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         orders = super().create(vals_list)
-        for order in orders:
-            if not order.carrier_id and order._is_auto_set_carrier_on_create():
-                order._set_delivery_carrier()
+        orders._set_carrier_on_create()
         return orders
+
+    def _set_carrier_on_create(self):
+        if self.env.context.get("carrier_on_create"):
+            return
+        for order in self:
+            if not order.carrier_id and order._is_auto_set_carrier_on_create():
+                order.with_context(carrier_on_create=True)._set_delivery_carrier()
+
+    def write(self, vals):
+        # When product lines are added, set the carrier
+        res = super(SaleOrder, self.with_context(carrier_on_create=True)).write(vals)
+        self._set_carrier_on_create()
+        return res
 
     def _is_auto_set_carrier_on_confirm(self):
         self.ensure_one()
