@@ -71,6 +71,22 @@ class TestSaleOrderCarrierAutoAssignOnCreate(TestSaleOrderCarrierAutoAssignCommo
         )
         self.assertEqual(sale_order.carrier_id, self.delivery_local_delivery)
 
+    def test_sale_order_carrier_auto_assign_create_2steps(self):
+        """Test carrier is set when a product line is added"""
+        sale_order = self.env["sale.order"].create(
+            {
+                "partner_id": self.partner.id,
+            }
+        )
+        sale_order.write(
+            {
+                "order_line": [
+                    Command.create({"product_id": self.product_storable.id})
+                ],
+            }
+        )
+        self.assertEqual(sale_order.carrier_id, self.delivery_local_delivery)
+
     def test_sale_order_carrier_auto_assign_disabled(self):
         self.settings.carrier_on_create = False
         self.settings.set_values()
