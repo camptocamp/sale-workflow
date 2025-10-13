@@ -5,7 +5,6 @@ from odoo import fields, models
 
 
 class ResCompany(models.Model):
-
     _inherit = "res.company"
 
     pricelist_cache_auhorize_apikey_ids = fields.Many2many(
