@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-
     <record id="ir_exp_cache_item" model="ir.exports">
         <field name="name">Pricelist Cache Parser</field>
         <field name="resource">pricelist.cache</field>
@@ -17,5 +16,4 @@
         <field name="name">price</field>
         <field name="export_id" ref="ir_exp_cache_item" />
     </record>
-
 </odoo>
