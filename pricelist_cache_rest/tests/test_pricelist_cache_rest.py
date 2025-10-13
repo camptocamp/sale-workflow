@@ -1,56 +1,24 @@
 # Copyright 2021 Camptocamp SA (http://www.camptocamp.com)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 import contextlib
 import json
 
+from freezegun import freeze_time
 from werkzeug.exceptions import Unauthorized
 
-from odoo.addons.pricelist_cache.tests.common import TestPricelistCacheCommon
+from odoo.addons.pricelist_cache.tests.common import (
+    LIST_PRICES_MAPPING,
+    TestPricelistCacheCommon,
+)
+from odoo.addons.pricelist_cache_rest.controllers.main import PricelistController
 from odoo.addons.website.tools import MockRequest
 
-from ..controllers.main import PricelistController
 
-LIST_PRICES_MAPPING = {
-    "pricelist_cache.list0": [
-        {"id": 17, "price": 100.0},
-        {"id": 18, "price": 79.0},
-        {"id": 19, "price": 100.0},
-        {"id": 20, "price": 47.0},
-    ],
-    "pricelist_cache.list1": [
-        {"id": 17, "price": 75.0},
-        {"id": 18, "price": 79.0},
-        {"id": 19, "price": 100.0},
-        {"id": 20, "price": 47.0},
-    ],
-    "pricelist_cache.list2": [
-        {"id": 17, "price": 75.0},
-        {"id": 18, "price": 79.0},
-        {"id": 19, "price": 100.0},
-        {"id": 20, "price": 47.0},
-    ],
-    "pricelist_cache.list3": [
-        {"id": 17, "price": 25.0},
-        {"id": 18, "price": 79.0},
-        {"id": 19, "price": 100.0},
-        {"id": 20, "price": 47.0},
-    ],
-    "pricelist_cache.list4": [
-        {"id": 17, "price": 15.0},
-        {"id": 18, "price": 50.0},
-        {"id": 19, "price": 100.0},
-        {"id": 20, "price": 47.0},
-    ],
-    "pricelist_cache.list5": [
-        {"id": 17, "price": 45.0},
-        {"id": 18, "price": 99.0},
-        {"id": 19, "price": 120.0},
-        {"id": 20, "price": 67.0},
-    ],
-}
-
-
-class TestPricelistCache(TestPricelistCacheCommon):
+# Usa a date that's consistent w/ LIST_PRICES_MAPPING: it uses the prices  defined in
+# ``pricelist_cache/data/demo.xml``, and some of them have time-limited validity
+@freeze_time("2021-03-15")
+class TestPricelistCacheRest(TestPricelistCacheCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -58,8 +26,6 @@ class TestPricelistCache(TestPricelistCacheCommon):
         cls.api_key2 = cls.env.ref("pricelist_cache_rest.api_key_demo_2")
         cls.env.company.pricelist_cache_auhorize_apikey_ids += cls.api_key
         cls.ctrl = PricelistController()
-        cls.partner = cls.env.ref("base.res_partner_12")
-        cls.partner.property_product_pricelist = cls.list0
 
     @contextlib.contextmanager
     def _get_mocked_request(self, httprequest=None, extra_headers=None):
@@ -89,9 +55,10 @@ class TestPricelistCache(TestPricelistCacheCommon):
         partner = self.partner
         for pricelist_xmlid, expected_result in LIST_PRICES_MAPPING.items():
             partner.property_product_pricelist = self.env.ref(pricelist_xmlid)
-            result = []
             with self._get_mocked_request():
                 resp = self.ctrl.partner_pricelist(partner)
                 data = self._resp_data(resp)
-                [result.append(c) for c in data if c["id"] in self.products.ids]
+                result = list(filter(lambda c: c["id"] in self.products.ids, data))
+                result.sort(key=lambda r: r["id"])
+                expected_result.sort(key=lambda r: r["id"])
                 self.assertEqual(result, expected_result)
