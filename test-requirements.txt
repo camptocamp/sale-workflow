@@ -1,0 +1,2 @@
+odoo-addon-sale_stock_reference_by_line @ git+https://github.com/OCA/sale-workflow.git@refs/pull/3947/head#subdirectory=sale_stock_reference_by_line
+odoo-addon-sale_order_line_date @ git+https://github.com/OCA/sale-workflow.git@refs/pull/3946/head#subdirectory=sale_order_line_date
