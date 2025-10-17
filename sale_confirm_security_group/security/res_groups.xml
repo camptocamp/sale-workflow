@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record model="res.groups" id="group_can_confirm_sale">
+        <field name="name">Can Confirm Sales</field>
+        <field name="category_id" ref="base.module_category_hidden" />
+        <field
+            name="users"
+            eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"
+        />
+    </record>
+
+    <!--
+        Grant membership to "Can Confirm Sales" to all users that are Sales Admins,
+        not the other way around
+    -->
+    <record id="sales_team.group_sale_manager" model="res.groups">
+        <field
+            name="implied_ids"
+            eval="[(4, ref('sale_confirm_security_group.group_can_confirm_sale'))]"
+        />
+    </record>
+</odoo>
