@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!--
+        VIEWS DEFINED HERE ARE NOT DECLARED IN ``__manifest__.py``
+
+        We need first to load the models' test overrides to make them work,
+        so we import them in ``tests/test_sale_confirm_group_views.py``
+        when the setup is done
+    -->
+
+    <record id="dummy_sale_form_view" model="ir.ui.view">
+        <field name="name">Dummy SO form view</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <!--
+                Prepare a form view to test nested buttons:
+                add M2M fields with the ``action_confirm`` buttons within
+            -->
+            <form position="inside">
+                <sheet>
+                    <group>
+                        <field name="dummy_sale_ids">
+                            <list>
+                                <button
+                                    name="action_confirm"
+                                    type="object"
+                                    id="test_button_1"
+                                />
+                                <button
+                                    name="action_confirm"
+                                    type="object"
+                                    id="test_button_2"
+                                    invisible="not id"
+                                />
+                            </list>
+                            <form>
+                                <header>
+                                    <button
+                                        name="action_confirm"
+                                        type="object"
+                                        id="test_button_3"
+                                    />
+                                    <button
+                                        name="action_confirm"
+                                        type="object"
+                                        id="test_button_4"
+                                        invisible="not id"
+                                    />
+                                </header>
+                            </form>
+                        </field>
+                        <field name="dummy_user_ids">
+                            <list>
+                                <button
+                                    name="action_confirm"
+                                    type="object"
+                                    id="test_button_5"
+                                />
+                                <button
+                                    name="action_confirm"
+                                    type="object"
+                                    id="test_button_6"
+                                    invisible="not id"
+                                />
+                            </list>
+                            <form>
+                                <header>
+                                    <button
+                                        name="action_confirm"
+                                        type="object"
+                                        id="test_button_7"
+                                    />
+                                    <button
+                                        name="action_confirm"
+                                        type="object"
+                                        id="test_button_8"
+                                        invisible="not id"
+                                    />
+                                </header>
+                            </form>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
