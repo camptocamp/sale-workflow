@@ -7,8 +7,12 @@ from odoo import fields, models
 class Settings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    can_confirm_sales_groups_ids = fields.Many2many(
+    use_sale_confirmation_groups = fields.Boolean(
+        related="company_id.use_sale_confirmation_groups",
+        readonly=False,
+    )
+    sale_confirmation_group_ids = fields.Many2many(
         "res.groups",
-        related="company_id.can_confirm_sales_groups_ids",
+        related="company_id.sale_confirmation_group_ids",
         readonly=False,
     )

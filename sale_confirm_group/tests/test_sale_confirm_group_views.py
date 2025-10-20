@@ -6,10 +6,10 @@ from odoo_test_helper import FakeModelLoader
 
 from odoo import tools
 
-from .common import TestSaleConfirmGroupsCommon
+from .common import TestSaleConfirmGroupCommon
 
 
-class TestSaleConfirmGroupsViews(TestSaleConfirmGroupsCommon):
+class TestSaleConfirmGroupViews(TestSaleConfirmGroupCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -30,12 +30,12 @@ class TestSaleConfirmGroupsViews(TestSaleConfirmGroupsCommon):
         # Load demo views
         tools.convert.convert_file(
             cls.env,
-            module="sale_confirm_groups",
+            module="sale_confirm_group",
             filename="demo/sale_order_test_views.xml",
             idref={},
             kind="test",
         )
-        cls.sale_form = cls.env.ref("sale_confirm_groups.dummy_sale_form_view")
+        cls.sale_form = cls.env.ref("sale_confirm_group.dummy_sale_form_view")
 
     def test_action_confirm_invisible(self):
         arch = fromstring(self.env["sale.order"].get_view(self.sale_form.id)["arch"])

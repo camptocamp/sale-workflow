@@ -4,7 +4,7 @@
         VIEWS DEFINED HERE ARE NOT DECLARED IN ``__manifest__.py``
 
         We need first to load the models' test overrides to make them work,
-        so we import them in ``tests/test_sale_confirm_groups_views.py``
+        so we import them in ``tests/test_sale_confirm_group_views.py``
         when the setup is done
     -->
 

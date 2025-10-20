@@ -7,7 +7,8 @@ from odoo import fields, models
 class Company(models.Model):
     _inherit = "res.company"
 
-    can_confirm_sales_groups_ids = fields.Many2many(
+    use_sale_confirmation_groups = fields.Boolean()
+    sale_confirmation_group_ids = fields.Many2many(
         "res.groups",
         relation="res_company_2_res_groups_sales_confirm_rel",
         column1="company_id",
