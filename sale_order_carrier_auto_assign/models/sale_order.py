@@ -83,6 +83,10 @@ class SaleOrder(models.Model):
                 delivery_wiz_action.get("res_model")
             ].with_context(**delivery_wiz_context)
             if self._origin:
+                # If `self._origin` is set, it can be a NewId object: use always its id
+                delivery_wiz_model = delivery_wiz_model.with_context(
+                    default_order_id=self._origin.id
+                )
                 delivery_wiz = delivery_wiz_model.create({})
             else:
                 delivery_wiz = delivery_wiz_model.new({})
