@@ -4,3 +4,5 @@
 - Phuc (Tran Thanh) \<<phuc@trobz.com>\>
 - Telmo Santos \<<telmo.santos@camptocamp.com>\>
 - Tris Doan \<<tridm@trobz.com>\>
+- Eduardo de Miguel ([Moduon](https://www.moduon.team/))
+- Simone Orsi \<<simone.orsi@camptocamp.com>\>
