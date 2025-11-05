@@ -76,7 +76,11 @@ class SaleOrder(models.Model):
         :param preserve_order_carrier: It will respect the carrier set on the order
         """
         for order in self:
-            if not order.order_line:
+            if (
+                not order.order_line
+                or isinstance(order.id, models.NewId)
+                and not order._origin
+            ):
                 continue
             if order.delivery_set and preserve_order_carrier:
                 continue
@@ -87,10 +91,10 @@ class SaleOrder(models.Model):
             delivery_wiz_model = self.env[
                 delivery_wiz_action.get("res_model")
             ].with_context(**delivery_wiz_context)
-            if self._origin:
+            if order._origin:
                 # If `self._origin` is set, it can be a NewId object: use always its id
                 delivery_wiz_model = delivery_wiz_model.with_context(
-                    default_order_id=self._origin.id
+                    default_order_id=order._origin.id
                 )
             delivery_wiz = delivery_wiz_model.new({})
             # Do not override carrier
