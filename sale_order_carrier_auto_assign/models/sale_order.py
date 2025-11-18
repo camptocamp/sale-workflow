@@ -76,12 +76,12 @@ class SaleOrder(models.Model):
             delivery_wiz_model = self.env[
                 delivery_wiz_action.get("res_model")
             ].with_context(**delivery_wiz_context)
-            if order._origin:
-                # If `self._origin` is set, it can be a NewId object: use always its id
-                delivery_wiz_model = delivery_wiz_model.with_context(
-                    default_order_id=order._origin.id
-                )
+
             delivery_wiz = delivery_wiz_model.new({})
+            delivery_wiz.order_id = order
+            if not delivery_wiz.order_id and order._origin:
+                delivery_wiz.order_id = order._origin
+
             # Do not override carrier
             if preserve_order_carrier and order.carrier_id:
                 delivery_wiz.carrier_id = order.carrier_id
