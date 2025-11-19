@@ -9,14 +9,15 @@ class SaleOrder(models.Model):
 
     def _is_auto_set_carrier_on_create(self):
         return (
-            self.state in ("draft", "sent")
+            not self.carrier_id
+            and self.state in ("draft", "sent")
             and self.company_id.carrier_on_create
             and not self.is_all_service
         )
 
     def _auto_set_carrier_on_create(self):
         for rec in self:
-            if not rec.carrier_id and rec._is_auto_set_carrier_on_create():
+            if rec._is_auto_set_carrier_on_create():
                 rec._set_delivery_carrier()
 
     @api.model_create_multi
@@ -27,17 +28,15 @@ class SaleOrder(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if self._is_auto_set_carrier_on_write(vals):
-            for rec in self:
-                if rec.state in ("draft", "sent"):
-                    rec._set_delivery_carrier(preserve_order_carrier=False)
+        for rec in self:
+            if rec._is_auto_set_carrier_on_write(vals):
+                rec._set_delivery_carrier(preserve_order_carrier=False)
         return res
 
     def _is_auto_set_carrier_on_write(self, vals):
-        return not vals.get("carrier_id") and (
-            vals.get("partner_id")
-            or vals.get("partner_shipping_id")
-            or vals.get("order_line")
+        return self.state in ("draft", "sent") and bool(
+            not vals.get("carrier_id")
+            and (vals.get("partner_id") or vals.get("partner_shipping_id"))
         )
 
     def _is_auto_set_carrier_on_confirm(self):
