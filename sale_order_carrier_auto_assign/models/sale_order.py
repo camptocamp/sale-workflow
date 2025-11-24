@@ -16,9 +16,11 @@ class SaleOrder(models.Model):
         )
 
     def _auto_set_carrier_on_create(self):
+        if self.env.context.get("carrier_on_create"):
+            return
         for rec in self:
             if rec._is_auto_set_carrier_on_create():
-                rec._set_delivery_carrier()
+                rec.with_context(carrier_on_create=True)._set_delivery_carrier()
 
     @api.model_create_multi
     def create(self, vals_list):
