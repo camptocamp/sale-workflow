@@ -60,6 +60,7 @@ class SaleOrder(models.Model):
 
         :param set_delivery_line: It will create or update the delivery line
         :param preserve_order_carrier: It will respect the carrier set on the order
+            but will still update delivery costs.
         """
         for order in self:
             if (
@@ -68,7 +69,7 @@ class SaleOrder(models.Model):
                 and not order._origin
             ):
                 continue
-            if order.delivery_set and preserve_order_carrier:
+            if order.delivery_set:
                 continue
             delivery_wiz_action = order.action_open_delivery_wizard()
             delivery_wiz_context = delivery_wiz_action.get("context", {})
