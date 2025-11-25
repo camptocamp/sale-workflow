@@ -81,12 +81,11 @@ class TestAutomaticWorkflow(TestCommon, TestAutomaticWorkflowMixin):
         product_service = self.env["product.product"].create(
             {
                 "name": "Remodeling Service",
-                "categ_id": self.env.ref("product.product_category_3").id,
+                "categ_id": self.env.ref("product.product_category_services").id,
                 "standard_price": 40.0,
                 "list_price": 90.0,
                 "type": "service",
                 "uom_id": self.env.ref("uom.product_uom_hour").id,
-                "uom_po_id": self.env.ref("uom.product_uom_hour").id,
                 "description": "Example of product to invoice on order",
                 "default_code": "PRE-PAID",
                 "invoice_policy": "order",
@@ -102,7 +101,7 @@ class TestAutomaticWorkflow(TestCommon, TestAutomaticWorkflowMixin):
                         "name": "Prepaid Consulting",
                         "product_id": product_service.id,
                         "product_uom_qty": 1,
-                        "product_uom": product_uom_hour.id,
+                        "product_uom_id": product_uom_hour.id,
                     },
                 )
             ]
@@ -179,12 +178,11 @@ class TestAutomaticWorkflow(TestCommon, TestAutomaticWorkflowMixin):
         product_service = self.env["product.product"].create(
             {
                 "name": "Remodeling Service",
-                "categ_id": self.env.ref("product.product_category_3").id,
+                "categ_id": self.env.ref("product.product_category_services").id,
                 "standard_price": 40.0,
                 "list_price": 90.0,
                 "type": "service",
                 "uom_id": self.env.ref("uom.product_uom_hour").id,
-                "uom_po_id": self.env.ref("uom.product_uom_hour").id,
                 "description": "Example of product to invoice on order",
                 "default_code": "PRE-PAID",
                 "invoice_policy": "order",
@@ -201,7 +199,7 @@ class TestAutomaticWorkflow(TestCommon, TestAutomaticWorkflowMixin):
                         "name": "Prepaid Consulting",
                         "product_id": product_service.id,
                         "product_uom_qty": 1,
-                        "product_uom": product_uom_hour.id,
+                        "product_uom_id": product_uom_hour.id,
                     },
                 )
             ],
