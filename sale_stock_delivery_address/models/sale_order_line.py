@@ -26,12 +26,3 @@ class SaleOrderLine(models.Model):
             if self.dest_address_id:
                 return (priority, self.dest_address_id)
         return key
-
-    def _prepare_procurement_values(self):
-        vals = super()._prepare_procurement_values()
-        if self._get_stock_reference_key()[0] == 15 and self.dest_address_id:
-            name_extension = (
-                self.dest_address_id.name or self.dest_address_id.contact_address
-            )
-            vals["origin"] = "/".join([vals["origin"], name_extension])
-        return vals

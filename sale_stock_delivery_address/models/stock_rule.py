@@ -7,11 +7,6 @@ from odoo import api, models
 class StockRule(models.Model):
     _inherit = "stock.rule"
 
-    def _get_custom_move_fields(self):
-        fields = super()._get_custom_move_fields()
-        fields += ["origin"]
-        return fields
-
     @api.model
     def run(self, procurements, raise_user_error=True):
         Procurement = self.env["stock.rule"].Procurement
