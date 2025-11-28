@@ -29,9 +29,9 @@ class SaleOrderLine(models.Model):
 
     def _prepare_procurement_values(self):
         vals = super()._prepare_procurement_values()
-        if self._get_stock_reference_key()[0] == 16 and self.dest_address_id:
+        if self._get_stock_reference_key()[0] == 15 and self.dest_address_id:
             name_extension = (
                 self.dest_address_id.name or self.dest_address_id.contact_address
             )
-            vals["name"] = "/".join([vals["name"], name_extension])
+            vals["origin"] = "/".join([vals["origin"], name_extension])
         return vals

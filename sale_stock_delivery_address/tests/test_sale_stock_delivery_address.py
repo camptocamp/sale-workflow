@@ -15,8 +15,10 @@ class TestStockSourcingAddress(TestStockSourcingAddressCommon):
         )
         move_1 = self.move_model.search([("sale_line_id", "=", self.line_1.id)])
         self.assertEqual(move_1.picking_id.partner_id, self.address_1)
+        self.assertEqual(move_1.origin, f"{self.so.name}/{self.address_1.name}")
         move_2 = self.move_model.search([("sale_line_id", "=", self.line_2.id)])
         self.assertEqual(move_2.picking_id.partner_id, self.address_2)
+        self.assertEqual(move_2.origin, f"{self.so.name}/{self.address_2.name}")
 
     def test_02_default_address(self):
         self.line_1.dest_address_id = self.address_1
@@ -24,9 +26,11 @@ class TestStockSourcingAddress(TestStockSourcingAddressCommon):
         self.assertEqual(len(self.so.picking_ids), 2)
         move_1 = self.move_model.search([("sale_line_id", "=", self.line_1.id)])
         self.assertEqual(move_1.picking_id.partner_id, self.address_1)
+        self.assertEqual(move_1.origin, f"{self.so.name}/{self.address_1.name}")
         move_2 = self.move_model.search([("sale_line_id", "=", self.line_2.id)])
         # Address in header should have been used:
         self.assertEqual(move_2.picking_id.partner_id, self.partner)
+        self.assertEqual(move_2.origin, f"{self.so.name}")
 
     def test_03_different_stock_location(self):
         # Use a different customer location in one of the addresses:
@@ -38,6 +42,8 @@ class TestStockSourcingAddress(TestStockSourcingAddressCommon):
         move_1 = self.move_model.search([("sale_line_id", "=", self.line_1.id)])
         self.assertEqual(move_1.picking_id.partner_id, self.address_1)
         self.assertEqual(move_1.location_dest_id, self.customer_loc_secondary)
+        self.assertEqual(move_1.origin, f"{self.so.name}/{self.address_1.name}")
         move_2 = self.move_model.search([("sale_line_id", "=", self.line_2.id)])
         self.assertEqual(move_2.picking_id.partner_id, self.address_2)
         self.assertEqual(move_2.location_dest_id, self.customer_loc_default)
+        self.assertEqual(move_2.origin, f"{self.so.name}/{self.address_2.name}")
