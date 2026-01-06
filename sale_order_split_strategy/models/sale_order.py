@@ -52,7 +52,7 @@ class SaleOrder(models.Model):
         )
         if not silent_errors:
             raise UserError(msg)
-        else:
+        elif not self.env.context.get("_no_lines_to_split_no_msg"):
             self.message_post(body=msg)
 
     def _handle_only_lines_to_split(self):
