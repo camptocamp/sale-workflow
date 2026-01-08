@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2026 C2C
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <record id="view_partner_form" model="ir.ui.view">
+        <field name="name">Add customer lead time to partner form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//page[@name='sales_purchases']//field[@name='user_id']"
+                position="after"
+            >
+                <label for="sale_delay" />
+                <div>
+                    <field name="sale_delay" class="oe_inline" /> days
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
