@@ -7,5 +7,6 @@ class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
     split_strategy_errors = fields.Selection(
-        related="company_id.split_strategy_errors", readonly=False,
+        related="company_id.split_strategy_errors",
+        readonly=False,
     )
