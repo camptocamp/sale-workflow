@@ -18,10 +18,12 @@ class SaleOrder(models.Model):
     )
 
     def action_split(self, silent_errors=False):
-        # TODO: Remove silent_errors arg on next major migration and rely on company field
+        # TODO: Remove silent_errors arg on next major migration and rely on company
+        #  field
         if silent_errors:
             _logger.warning(
-                "sale.order.action_split argument silent_errors is deprecated. Please set error handling in split strategy at company level."
+                "sale.order.action_split argument silent_errors is deprecated."
+                " Please set error handling in split strategy at company level."
             )
         silent_errors = self.company_id.split_strategy_errors != "raise_errors"
         orders_without_split = self.filtered(lambda o: not o.split_strategy_id)
