@@ -6,7 +6,6 @@ from collections import defaultdict
 from odoo import fields, models
 from odoo.exceptions import UserError
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -21,7 +20,9 @@ class SaleOrder(models.Model):
     def action_split(self, silent_errors=False):
         # TODO: Remove silent_errors arg on next major migration and rely on company field
         if silent_errors:
-            _logger.warning("sale.order.action_split argument silent_errors is deprecated. Please set error handling in split strategy at company level.")
+            _logger.warning(
+                "sale.order.action_split argument silent_errors is deprecated. Please set error handling in split strategy at company level."
+            )
         silent_errors = self.company_id.split_strategy_errors != "raise_errors"
         orders_without_split = self.filtered(lambda o: not o.split_strategy_id)
         if not silent_errors and orders_without_split:
@@ -65,13 +66,16 @@ class SaleOrder(models.Model):
 
     def _handle_only_lines_to_split(self):
         self.ensure_one()
-        self.message_post(
-            body=self.env._(
-                "This sale order was not split using strategy %(strategy)s"
-                " because there would not be any lines left on this order.",
-                strategy=self.split_strategy_id.name,
-            )
+        msg = self.env._(
+            "This sale order was not split using strategy %(strategy)s"
+            " because there would not be any lines left on this order.",
+            strategy=self.split_strategy_id.name,
         )
+        strategy_errors = self.company_id.split_strategy_errors
+        if strategy_errors == "raise_errors":
+            raise UserError(msg)
+        elif self.company_id.split_strategy_errors == "post_message":
+            self.message_post(body=msg)
 
     def _has_only_lines_to_split(self, lines_to_split):
         self.ensure_one()
