@@ -177,7 +177,7 @@ class TestSplitStrategy(BaseCommon):
     def test_error_no_lines_to_split(self):
         order = self._create_order()
         order.split_strategy_id = self.product_type_not_service_strategy
-        order.company_id.split_strategy_errors = "do_nothing"
+        order.company_id.sale_order_split_strategy_errors = "do_nothing"
         order.order_line.filtered(
             lambda li: li.product_id in (self.product_consu_1, self.product_consu_2)
         ).unlink()
@@ -185,12 +185,12 @@ class TestSplitStrategy(BaseCommon):
             new_orders = order.action_split()
             self.assertFalse(message_capture.records)
             self.assertFalse(new_orders)
-        order.company_id.split_strategy_errors = "post_message"
+        order.company_id.sale_order_split_strategy_errors = "post_message"
         with RecordCapturer(self.env["mail.message"].sudo(), []) as message_capture:
             new_orders = order.action_split()
             self.assertTrue(message_capture.records)
             self.assertFalse(new_orders)
-        order.company_id.split_strategy_errors = "raise_errors"
+        order.company_id.sale_order_split_strategy_errors = "raise_errors"
         with (
             RecordCapturer(self.env["mail.message"].sudo(), []) as message_capture,
             self.assertRaisesRegex(UserError, "there are no matching lines"),
@@ -201,7 +201,7 @@ class TestSplitStrategy(BaseCommon):
     def test_error_only_lines_to_split(self):
         order = self._create_order()
         order.split_strategy_id = self.product_type_not_service_strategy
-        order.company_id.split_strategy_errors = "do_nothing"
+        order.company_id.sale_order_split_strategy_errors = "do_nothing"
         order.order_line.filtered(
             lambda li: li.product_id not in (self.product_consu_1, self.product_consu_2)
         ).unlink()
@@ -209,12 +209,12 @@ class TestSplitStrategy(BaseCommon):
             new_orders = order.action_split()
             self.assertFalse(message_capture.records)
             self.assertFalse(new_orders)
-        order.company_id.split_strategy_errors = "post_message"
+        order.company_id.sale_order_split_strategy_errors = "post_message"
         with RecordCapturer(self.env["mail.message"].sudo(), []) as message_capture:
             new_orders = order.action_split()
             self.assertTrue(message_capture.records)
             self.assertFalse(new_orders)
-        order.company_id.split_strategy_errors = "raise_errors"
+        order.company_id.sale_order_split_strategy_errors = "raise_errors"
         with (
             RecordCapturer(self.env["mail.message"].sudo(), []) as message_capture,
             self.assertRaisesRegex(
