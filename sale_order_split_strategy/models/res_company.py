@@ -6,7 +6,7 @@ from odoo import fields, models
 class ResCompany(models.Model):
     _inherit = "res.company"
 
-    split_strategy_errors = fields.Selection(
+    sale_order_split_strategy_errors = fields.Selection(
         [
             ("raise_errors", "Raise errors"),
             ("post_message", "Post message"),

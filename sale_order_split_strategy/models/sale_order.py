@@ -25,7 +25,7 @@ class SaleOrder(models.Model):
                 "sale.order.action_split argument silent_errors is deprecated."
                 " Please set error handling in split strategy at company level."
             )
-        silent_errors = self.company_id.split_strategy_errors != "raise_errors"
+        silent_errors = self.company_id.sale_order_split_strategy_errors != "raise_errors"
         orders_without_split = self.filtered(lambda o: not o.split_strategy_id)
         if not silent_errors and orders_without_split:
             raise UserError(
@@ -63,7 +63,7 @@ class SaleOrder(models.Model):
         )
         if not silent_errors:
             raise UserError(msg)
-        elif self.company_id.split_strategy_errors == "post_message":
+        elif self.company_id.sale_order_split_strategy_errors == "post_message":
             self.message_post(body=msg)
 
     def _handle_only_lines_to_split(self):
@@ -73,10 +73,10 @@ class SaleOrder(models.Model):
             " because there would not be any lines left on this order.",
             strategy=self.split_strategy_id.name,
         )
-        strategy_errors = self.company_id.split_strategy_errors
+        strategy_errors = self.company_id.sale_order_split_strategy_errors
         if strategy_errors == "raise_errors":
             raise UserError(msg)
-        elif self.company_id.split_strategy_errors == "post_message":
+        elif self.company_id.sale_order_split_strategy_errors == "post_message":
             self.message_post(body=msg)
 
     def _has_only_lines_to_split(self, lines_to_split):
