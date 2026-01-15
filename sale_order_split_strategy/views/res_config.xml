@@ -10,7 +10,7 @@
                     help="How split errors are to be reported"
                 >
                     <field
-                        name="split_strategy_errors"
+                        name="sale_order_split_strategy_errors"
                         class="o_light_label"
                         widget="radio"
                         options="{'horizontal': true}"

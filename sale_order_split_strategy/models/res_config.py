@@ -6,7 +6,7 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
-    split_strategy_errors = fields.Selection(
-        related="company_id.split_strategy_errors",
+    sale_order_split_strategy_errors = fields.Selection(
+        related="company_id.sale_order_split_strategy_errors",
         readonly=False,
     )
