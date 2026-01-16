@@ -76,7 +76,7 @@ class SaleOrder(models.Model):
         strategy_errors = self.company_id.sale_order_split_strategy_errors
         if strategy_errors == "raise_errors":
             raise UserError(msg)
-        elif self.company_id.sale_order_split_strategy_errors == "post_message":
+        elif strategy_errors == "post_message":
             self.message_post(body=msg)
 
     def _has_only_lines_to_split(self, lines_to_split):
