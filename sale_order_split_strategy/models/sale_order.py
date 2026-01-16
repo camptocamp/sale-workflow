@@ -25,7 +25,9 @@ class SaleOrder(models.Model):
                 "sale.order.action_split argument silent_errors is deprecated."
                 " Please set error handling in split strategy at company level."
             )
-        silent_errors = self.company_id.sale_order_split_strategy_errors != "raise_errors"
+        silent_errors = (
+            self.company_id.sale_order_split_strategy_errors != "raise_errors"
+        )
         orders_without_split = self.filtered(lambda o: not o.split_strategy_id)
         if not silent_errors and orders_without_split:
             raise UserError(
