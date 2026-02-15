@@ -13,6 +13,7 @@
     "maintainers": ["yankinmax"],
     "data": [
         # Views
-        "views/product_view.xml",
+        "views/product_product_view.xml",
+        "views/product_template_view.xml",
     ],
 }

@@ -3,8 +3,8 @@
 from odoo import fields, models
 
 
-class ProductProduct(models.Model):
-    _inherit = "product.product"
+class ProductTemplate(models.Model):
+    _inherit = "product.template"
 
     sale_multiple_uom_id = fields.Many2one(
         comodel_name="uom.uom",
