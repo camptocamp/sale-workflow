@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template
+        id="multiple_product_quantity"
+        inherit_id="website_sale.product_quantity"
+        name="Round quantity"
+    >
+        <xpath expr="//input[@name='add_qty']" position="attributes">
+            <attribute
+                name="t-att-value"
+            >combination_info['multiple_qty'] if combination_info['is_multiple'] else 1</attribute>
+        </xpath>
+    </template>
+</odoo>
