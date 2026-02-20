@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template
+        id="multiple_product_quantity"
+        inherit_id="website_sale.product_quantity"
+        name="Round quantity"
+    >
+        <xpath expr="//input[@name='add_qty']" position="attributes">
+            <attribute
+                name="t-att-value"
+            >combination_info['multiple_qty'] if combination_info['is_multiple'] else 1</attribute>
+        </xpath>
+    </template>
+    <!--
+        Rewrite ``website_sale.base_unit_price`` template
+        to have the same layout as ``website_sale.product_price``.
+        This is basically a copy of the ``website_sale.product_price``.
+    -->
+    <template id="website_sale.base_unit_price" name="Product Base unit price">
+        <div
+            name="product_price"
+            t-attf-class="product_price {{'d-none' if combination_info['prevent_zero_price_sale'] else 'd-inline-block'}}"
+        >
+            <div
+                name="product_price_container"
+                class="css_editable_mode_hidden d-flex align-items-baseline justify-content-end gap-2 flex-wrap h5 mb-0 text-wrap"
+            >
+                <span
+                class="oe_price o_base_unit_price"
+                style="white-space: nowrap;"
+                t-out="base_unit_price"
+                t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
+            />
+                 / <span class="oe_custom_base_unit" t-field="product.base_unit_name" />
+            </div>
+        </div>
+    </template>
+    <template
+        id="product_page_base_unit_price"
+        inherit_id="website_sale.product"
+        name="Product page: base unit only product price"
+    >
+        <!-- Always hide ``website_sale.product_price`` when ``base_unit_price`` is available -->
+        <t t-call="website_sale.product_price" position="attributes">
+            <attribute
+                name="t-if"
+            >not combination_info.get('base_unit_price')</attribute>
+        </t>
+
+        <!-- Hide existing ``o_base_unit_price_wrapper`` -->
+        <xpath
+            expr="//small[hasclass('o_base_unit_price_wrapper')]"
+            position="attributes"
+        >
+            <attribute name="t-if">False</attribute>
+        </xpath>
+        <!-- Add below ``o_base_unit_price_wrapper`` the ``website_sale.base_unit_price``
+            to have same layout as ``website_sale.product_price``
+        -->
+        <xpath expr="//small[hasclass('o_base_unit_price_wrapper')]" position="after">
+            <div
+                t-if="combination_info.get('base_unit_price')"
+                class="o_base_unit_price_wrapper"
+            >
+                <t t-call="website_sale.base_unit_price">
+                    <t
+                        t-set="base_unit_price"
+                        t-value="combination_info['base_unit_price']"
+                    />
+                </t>
+            </div>
+        </xpath>
+    </template>
+    <template
+        id="cta_wrapper_boxed_base_unit_price"
+        inherit_id="website_sale.cta_wrapper_boxed"
+        name="CTA boxed: base unit only product price"
+    >
+        <!-- The CTA boxed template inserts ``website_sale.product_price`` in its own block.
+             Hide it when base_unit_price exists.
+        -->
+        <t t-call="website_sale.product_price" position="attributes">
+            <attribute
+                name="t-if"
+            >not combination_info.get('base_unit_price')</attribute>
+        </t>
+
+        <!-- Add ``website_sale.base_unit_price`` after ``website_sale.product_price`` -->
+        <t t-call="website_sale.product_price" position="after">
+            <t t-if="combination_info.get('base_unit_price')">
+                <span class="oe_price">
+                    <t t-call="website_sale.base_unit_price">
+                        <t
+                            t-set="base_unit_price"
+                            t-value="combination_info['base_unit_price']"
+                        />
+                    </t>
+                </span>
+            </t>
+        </t>
+    </template>
+</odoo>
