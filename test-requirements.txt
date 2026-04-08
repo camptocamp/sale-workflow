@@ -1,0 +1,1 @@
+odoo-addon-sale_order_line_section @ git+https://github.com/OCA/sale-workflow.git@refs/pull/4260/head#subdirectory=sale_order_line_section
