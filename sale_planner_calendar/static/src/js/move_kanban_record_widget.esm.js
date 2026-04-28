@@ -1,6 +1,6 @@
+import {Component} from "@odoo/owl";
 import {registry} from "@web/core/registry";
 import {useService} from "@web/core/utils/hooks";
-import {Component} from "@odoo/owl";
 
 export class MoveBaseWidget extends Component {
     static template = "sale_planner_calendar.MoveBaseWidget";
