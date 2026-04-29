@@ -57,7 +57,7 @@ WITH sol_qty_procured AS (
         ) AS qty_procured
     FROM
     sale_order_line AS sol
-    LEFT JOIN stock_move AS sm ON (
+    INNER JOIN stock_move AS sm ON (
         sm.state != 'cancel'
         AND sm.scrapped = false
         AND sol.product_id = sm.product_id
