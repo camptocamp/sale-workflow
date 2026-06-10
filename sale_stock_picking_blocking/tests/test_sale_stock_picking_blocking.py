@@ -66,6 +66,33 @@ class TestSaleDeliveryBlock(TransactionCase):
         with self.assertRaises(ValidationError):
             so.write({"delivery_block_id": block_reason.id})
 
+    def test_auto_done_skips_default_delivery_block(self):
+        """With "auto_done_setting" active, the default delivery block coming
+        from the partner (or payment term) must not be auto-applied, otherwise
+        saving the order raises a ValidationError (see _check_not_auto_done)."""
+        # Set active auto done configuration
+        config = self.env["res.config.settings"].create(
+            {"group_auto_done_setting": True}
+        )
+        config.execute()
+        block_reason = self.block_model.with_user(self.user_test).create(
+            {"name": "Test Block."}
+        )
+        partner_block = self.env["res.partner"].create(
+            {
+                "name": "Foo",
+                "default_delivery_block": block_reason.id,
+            }
+        )
+        # Creating/saving a sale order for a partner with a default delivery
+        # block must not raise when "auto_done_setting" is active.
+        so_form = Form(self.env["sale.order"].with_user(self.user_test))
+        so_form.partner_id = partner_block
+        so = so_form.save()
+        self.assertFalse(
+            so.delivery_block_id,
+        )
+
     def _picking_comp(self, so):
         """count created pickings"""
         count = len(so.picking_ids)
