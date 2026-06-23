@@ -1,0 +1,6 @@
+- Camptocamp
+  - Akim Juillerat \<<akim.juillerat@camptocamp.com>\>
+  - chaule97 \<<lebaochau97@gmail.com>\>
+  - David Gallay \<<david.gallay@camptocamp.com>\>
+  - Simone Orsi \<<simahawk@gmail.com>\>
+  - Thierry Ducrest \<<TDu@users.noreply.github.com>\>
