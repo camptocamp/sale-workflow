@@ -1,0 +1,2 @@
+- Manuel Regidor <manuel.regidor@sygel.es>
+- Camptocamp SA
