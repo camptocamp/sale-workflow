@@ -89,6 +89,9 @@ class SaleOrderLine(models.Model):
             previous_product_uom_qty[line.id] = line.product_uom_qty
         if procurements:
             self.env["stock.rule"].run(procurements)
+        ignore_procurement_line_ids = [
+            proc.values.get("sale_line_id") for proc in procurements
+        ]
         # This next block is currently needed only because the scheduler trigger is done
         # by picking confirmation rather than stock.move confirmation
         orders = self.mapped("order_id")
@@ -100,5 +103,16 @@ class SaleOrderLine(models.Model):
                 # Trigger the Scheduler for Pickings
                 pickings_to_confirm.action_confirm()
         return super(
-            SaleOrderLine, self.with_context(sale_group_by_line=True)
+            SaleOrderLine,
+            self.with_context(
+                sale_group_by_line=True,
+                force_get_qty_procurement=ignore_procurement_line_ids,
+            ),
         )._action_launch_stock_rule(previous_product_uom_qty=previous_product_uom_qty)
+
+    def _get_qty_procurement(self, previous_product_uom_qty=False):
+        if self.id in self.env.context.get("force_get_qty_procurement", []):
+            return self.product_uom_qty
+        return super()._get_qty_procurement(
+            previous_product_uom_qty=previous_product_uom_qty
+        )

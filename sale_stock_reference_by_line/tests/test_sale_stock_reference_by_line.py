@@ -135,6 +135,15 @@ class TestSaleStockReferenceByLine(TestSaleStockCommon):
         self.assertEqual(
             len(self.sale.picking_ids), 1, "Negative stock move should me merged"
         )
+        self.assertEqual(
+            len(
+                self.sale.picking_ids.move_ids.filtered(
+                    lambda move: move.state not in ("cancel", "done")
+                )
+            ),
+            1,
+            "The zeroed line should not create an extra active move",
+        )
 
     def test_06_update_sale_order_line_respect_stock_reference(self):
         """
@@ -147,3 +156,30 @@ class TestSaleStockReferenceByLine(TestSaleStockCommon):
         self.sale.order_line[1].product_uom_qty += 1
         self.assertEqual(self.sale.order_line[1].stock_reference_id, stock_ref)
         self.assertEqual(len(self.line1.move_ids), 1)
+
+    def test_07_force_get_qty_procurement_uses_ordered_qty(self):
+        """
+        When active moves are cancelled, qty procured can be lower than ordered.
+        The context guard must force ordered qty for already handled lines.
+        """
+        self.sale.action_confirm()
+        line = self.sale.order_line[1]
+        line_moves = line.move_ids.filtered(
+            lambda move: move.state not in ("cancel", "done")
+        )
+        line_moves._action_cancel()
+        qty_without_ctx = line._get_qty_procurement()
+        self.assertEqual(qty_without_ctx, 0.0)
+        qty_with_ctx = line.with_context(
+            force_get_qty_procurement=[line.id]
+        )._get_qty_procurement()
+        self.assertEqual(qty_with_ctx, line.product_uom_qty)
+
+    def test_08_prepare_procurement_values_include_line_ids(self):
+        """Procurement values must carry sale_line_id used by context ignore list."""
+        self.sale.action_confirm()
+        line_ids_from_values = {
+            line._prepare_procurement_values()["sale_line_id"]
+            for line in self.sale.order_line
+        }
+        self.assertEqual(line_ids_from_values, set(self.sale.order_line.ids))
