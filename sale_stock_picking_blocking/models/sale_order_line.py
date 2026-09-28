@@ -13,3 +13,9 @@ class SaleOrderLine(models.Model):
             SaleOrderLine,
             self.filtered(lambda line: not line.order_id.delivery_block_id),
         )._action_launch_stock_rule(previous_product_uom_qty=previous_product_uom_qty)
+
+    def _create_procurements(self, product_qty, procurement_uom, values):
+        allowed = not self.order_id.delivery_block_id
+        if not allowed:
+            return []
+        return super()._create_procurements(product_qty, procurement_uom, values)
