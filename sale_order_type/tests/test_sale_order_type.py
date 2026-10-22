@@ -368,3 +368,7 @@ class TestSaleOrderType(BaseCommon):
             order.order_line[0].analytic_distribution,
             {str(self.analytic_account.id): 100.0},
         )
+
+    def test_picking_policy_no_default(self):
+        sale_type = self.sale_type_model.create({"name": "Test Type No Policy"})
+        self.assertFalse(sale_type.picking_policy)
